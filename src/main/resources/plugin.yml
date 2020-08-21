@@ -1,0 +1,12 @@
+name: TimeMachine
+author: Warunek
+main: com.warunek.timemachine.TimeMachine
+version: 1.0.0
+api-version: 1.13
+load: STARTUP
+description: An easy and simple server backup solution
+commands:
+  timemachine:
+    aliases: [tm]
+    description: command for changing settings and functionality
+    usage: /<command> help

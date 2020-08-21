@@ -1,0 +1,23 @@
+# Will there be automatic backups
+autoBackups: true
+
+# How often the server will automatically backup in minutes
+autoBackupFrequency: 1440
+
+backupFolderDirectory: ''
+
+# To include the plugins' jar files
+includePluginJars: false
+
+# To include the plugins' jar files
+includeServerJar: false
+
+# What you dont want backed up; backup location is automatically excluded
+backupExceptions:
+  - 'logs'
+
+# format that backups will be named. &%date%& will be replaced with the date
+backupNameFormat: 'Server-Backup-%date%'
+
+# Format that the date will be presented. For syntax, consult https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html
+dataFormat: 'yyyy-MM-dd_HH-mm-ss'
