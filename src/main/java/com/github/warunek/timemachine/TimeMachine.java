@@ -29,6 +29,7 @@ public class TimeMachine extends JavaPlugin{
     public boolean saveConfig = false;
     public boolean isRestoring = false;
     public boolean isBackingUp = false;
+    public boolean restorePlayerWithWorld;
     public List<String> backupFilePaths = new ArrayList<>();
     public BukkitRunnable autobackupRunnable;
     public ArrayList<String> exempt;
@@ -43,74 +44,13 @@ public class TimeMachine extends JavaPlugin{
         return defPath;
     }
 
-    public static void main(String[] args) throws IOException {
+//    public static void main(String[] args){
 //        String backupDir= ("C:\\Users\\zacha\\Desktop\\1.16.2 server\\backups\\");
-//        String fileZip = ("C:\\Users\\zacha\\Desktop\\1.16.2 server\\backups\\Server_Backup_2020-08-19_00-14-02.zip");
-//        unzip(fileZip, destDir);
-
-//        File playerFiles = new File("C:\\Users\\zacha\\Desktop\\1.16.2 server\\world\\playerdata");
-//        args = new String[]{"restore", "player", ""};
-//        List<String> list = new ArrayList<>();
-//        if (args.length == 1) {
-//            String[] commands = new String[]{"backup", "restore"};
-//            for (String f : commands) {
-//                if (f.toLowerCase().startsWith(args[0].toLowerCase()))
-//                    list.add(f);
-//            }
-//        }
+//        String fileZip = ("C:\\Users\\zacha\\Desktop\\1.16.2 server\\backups\\Server_Backup_2020-08-24_14-31-38.zip");
+//        unzip(fileZip, backupDir);
 //
-//        else if (args.length > 1 && args[0].equalsIgnoreCase("restore")) {
-//            String[] commands = new String[]{"server", "world", "player", "pluginconfig"};
-//            if (args.length == 2)
-//                for (String f : commands) {
-//                    if (f.toLowerCase().startsWith(args[1].toLowerCase()))
-//                        list.add(f);
-//                }
-//            else if (args.length == 3) {
-//                switch (args[1].toLowerCase()) {
-//                    case "server":
-//                        if (new File(backupDir).listFiles() != null) {
-//                            for (File f : Objects.requireNonNull(new File(backupDir).listFiles())) {
-//                                if (f.getName().toLowerCase().startsWith(args[2].toLowerCase()))
-//                                    list.add(f.getName());
-//                            }
-//                        }
-//                        break;
-//                    case "player":
-//                        File file = playerFiles;
-//                        String name;
-//                        if ("all".toLowerCase().startsWith(args[2].toLowerCase()))
-//                            list.add("all");
-//                        if (file.isDirectory() && file.listFiles(datFilefilter = filter -> {return filter.getName().endsWith(".dat");}) != null) {
-//                            for (File player : file.listFiles(datFilefilter = filter -> {return filter.getName().endsWith(".dat");})) {
-//                                CompoundTag playerTag = null;
 //
-//                                try {
-//                                    playerTag = NBTIO.readFile(player);
-//                                    if (playerTag.contains("bukkit")) {
-//                                        name = (String) (((Tag) ((LinkedHashMap) playerTag.get("bukkit").getValue()).get("lastKnownName")).getValue());
-//                                        if (name.toLowerCase().startsWith(args[2].toLowerCase()))
-//                                            list.add(name);
-//                                    }
-//                                } catch (IOException e) {
-//                                    e.printStackTrace();
-//                                    Log.debug("[TimeMachine] " + player + " was null");
-//                                }
-//                            }
-//                        }
-//                        break;
-//                    case "world":
-//                        commands = new String[]{"all", "overworld", "the_nether", "the_end"};
-//                        for (String f : commands) {
-//                            if (f.toLowerCase().startsWith(args[2].toLowerCase()))
-//                                list.add(f);
-//                        }
-//                        break;
-//                }
-//            }
-//        }
-//        System.out.println(list);
-    }
+//    }
     private static void unzip(String zipFilePath, String destDir) {
         File dir = new File(destDir);
         // create output directory if it doesn't exist
@@ -168,6 +108,7 @@ public class TimeMachine extends JavaPlugin{
         autoBackupFrequency = (int) getConfigValue("autoBackupFrequency", 1440);
         backupNameFormat = (String) getConfigValue("backupNameFormat", "Server Backup %date%");
         dateFormat = new SimpleDateFormat((String)getConfigValue("dateFormat", "yyyy-MM-dd_HH-mm-ss"));
+        restorePlayerWithWorld = (boolean) getConfigValue("restorePlayerWithWorld", false);
 
         final TimeMachineCommand command = new TimeMachineCommand(this);
         final TimeMachineTabCompleter tabCompleter = new TimeMachineTabCompleter(this);

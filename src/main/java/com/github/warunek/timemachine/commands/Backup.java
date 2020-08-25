@@ -1,9 +1,23 @@
 package com.github.warunek.timemachine.commands;
 
 import com.github.warunek.timemachine.TimeMachine;
+import net.lingala.zip4j.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.ExcludeFileFilter;
+import net.lingala.zip4j.model.ZipParameters;
+import net.lingala.zip4j.progress.ProgressMonitor;
+import net.lingala.zip4j.util.Zip4jUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.World;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,14 +31,14 @@ import java.util.zip.ZipOutputStream;
 
 public class Backup {
 
-    final TimeMachine plugin;
+    static TimeMachine plugin;
+    static CommandSender sender;
+    static int temp = 0;
+    static public int taskIndex;
 
-    public Backup(final TimeMachine instance) throws Exception {
+    public static void backup(final TimeMachine instance, CommandSender sender) throws Exception {
         plugin = instance;
-        backup();
-    }
-
-    private void backup() throws Exception {
+        Backup.sender = sender;
         List<World> autosave = new ArrayList<>();
         Bukkit.savePlayers();
         for (World loaded : Bukkit.getWorlds()) {
@@ -35,36 +49,47 @@ public class Backup {
                     loaded.setAutoSave(false);
                 }
 
-            } catch (Exception e) {
-            }
+            } catch (Exception e) {}
         }
-        new BukkitRunnable(){
+        Player player = null;
+        BossBar bar = Bukkit.createBossBar(ChatColor.DARK_AQUA + "Backing Up Server", BarColor.GREEN, BarStyle.SOLID);
+        if(sender instanceof Player) {
+            player = (Player) sender;
+            bar.addPlayer(player);
+            bar.setVisible(true);
+        }
+        long time = System.currentTimeMillis();
+        Date d = new Date(time);
+        ZipFile zipFile = new ZipFile(plugin.backups.getAbsolutePath() + File.separator + plugin.backupNameFormat.replaceAll("%date%", plugin.dateFormat.format(d)) + ".zip");
+        ProgressMonitor progressMonitor = zipFile.getProgressMonitor();
+
+        ExcludeFileFilter exclude = file -> file.getName().equalsIgnoreCase("backups");
+        ZipParameters zipParam = new ZipParameters();
+        zipParam.setExcludeFileFilter(exclude);
+        zipFile.setRunInThread(true);
+        bar.setProgress(0);
+        try {
+            zipFile.addFolder(new File(plugin.mainDir.getAbsolutePath()), zipParam);
+        } catch (ZipException e) {
+            e.printStackTrace();
+        }
+
+        taskIndex = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
             @Override
             public void run() {
-
-                final long time = System.currentTimeMillis();
-                Date d = new Date(time);
-                File zipFile = new File(plugin.backups, plugin.backupNameFormat.replaceAll("%date%", plugin.dateFormat.format(d)) + ".zip");
-                if (!zipFile.exists()) {
-                    zipFile.getParentFile().mkdirs();
-                    zipFile = new File(plugin.backups, plugin.backupNameFormat.replaceAll("%date%", plugin.dateFormat.format(d)) + ".zip");
-                    try {
-                        zipFile.createNewFile();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                if (!progressMonitor.getState().equals(ProgressMonitor.State.READY)) {
+                    bar.setProgress(Math.min(((double) progressMonitor.getPercentDone()) / 100, 1.0));
+                    bar.setTitle(ChatColor.DARK_AQUA + "Backing Up Server: " + ChatColor.GOLD + progressMonitor.getPercentDone() + "%");
                 }
-                try {
-                    zipFolder(plugin.mainDir.getAbsolutePath(), zipFile.getPath());
-                } catch (Exception e) {
-                    e.printStackTrace();
+                else{
+                    plugin.isBackingUp = false;
+                    bar.removeAll();
                 }
-                plugin.isBackingUp = false;
             }
-        }.runTaskAsynchronously(plugin);
+        },0, 5);
     }
 
-    private void findSrcFiles(String path, String srcFile, ZipOutputStream zip) {
+    private static void findSrcFiles(String path, String srcFile, ZipOutputStream zip) {
         try {
             File folder = new File(srcFile);
 
@@ -95,7 +120,7 @@ public class Backup {
         }catch (Exception e){
         }
     }
-    private void findSrcFolders(String path, String srcFolder, ZipOutputStream zip) {
+    private static void findSrcFolders(String path, String srcFolder, ZipOutputStream zip) {
 
         try {
             File folder = new File(srcFolder);
@@ -115,7 +140,7 @@ public class Backup {
         }
     }
 
-    private void zipFolder(String srcFolder, String destZipFile) throws Exception {
+    private static void zipFolder(String srcFolder, String destZipFile) throws Exception {
         ZipOutputStream zip = null;
         FileOutputStream fileWriter = null;
 

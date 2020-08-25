@@ -3,11 +3,13 @@ package com.github.warunek.timemachine.util;
 import com.github.warunek.timemachine.TimeMachine;
 import com.github.warunek.timemachine.commands.Backup;
 import com.github.warunek.timemachine.commands.Restore;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.libs.jline.internal.Log;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitScheduler;
 
 import java.io.File;
 import java.util.Date;
@@ -28,12 +30,14 @@ public class TimeMachineCommand implements CommandExecutor {
             return true;
         }
         if(args.length == 0){
-            sender.sendMessage(ChatColor.AQUA + "---===###-Time Machine-###===---");
-            sender.sendMessage("/tm backup : Starts a backup of the server");
-            sender.sendMessage("/tm restoreAll <backup> : Restores server to a previous backup almost instantly");
-            sender.sendMessage("/tm restoreWorld <backup> <(optional)x:y>: Restores a world save or individual chunks to a previous backup");
-            sender.sendMessage("/tm enableAutoSaver [1H,6H,1D,7D] : Configure how long it takes to autosave");
-            sender.sendMessage("/tm disableAutoSaver : Disables the autosaver");
+            sender.sendMessage(ChatColor.AQUA + "---===###-Time Machine-###===---\n " + ChatColor.RESET +
+                    "/tm backup : Starts a backup of the server\n" +
+                    "/tm restore server <backup> : restores all server files\n" +
+                    "/tm restore world <world:all> <backup> : restores selected world files\n" +
+                    "/tm restore player <player:all> <backup> : restores selected player's save file\n" + ChatColor.GRAY +
+                    "/tm restore pluginconfig <plugin:all> <backup> : Restores plugin files of selected plugin" +
+                    "/tm restoreWorld <backup> <(optional)x:y>: Restores a world save or individual chunks to a previous backup" +
+                    "/tm disableAutoSaver : Disables the autosaver");
             return true;
         }
         if(args[0].equalsIgnoreCase("backup")){
@@ -42,11 +46,20 @@ public class TimeMachineCommand implements CommandExecutor {
                 return true;
             }
             try {
-                sender.sendMessage(ChatColor.DARK_AQUA + "Backup Started at " + plugin.dateFormat.format(new Date()));
+                sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + "Backup Started at " + plugin.dateFormat.format(new Date()));
                 plugin.isBackingUp = true;
-                new Backup(plugin);
-                sender.sendMessage(ChatColor.GREEN + "[SUCCESS]" + ChatColor.DARK_AQUA + " Server was backed up");
-                plugin.isBackingUp = false;
+                Backup.backup(plugin, sender);
+
+                new BukkitRunnable(){
+                    @Override
+                    public void run() {
+                        if(!plugin.isBackingUp){
+                            sender.sendMessage(ChatColor.GREEN + "[SUCCESS]" + ChatColor.DARK_AQUA + " Server was backed up!");
+                            Bukkit.getScheduler().cancelTask(Backup.taskIndex);
+                            this.cancel();
+                        }
+                    }
+                }.runTaskTimer(plugin, 20, 5);
                 return true;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -63,14 +76,14 @@ public class TimeMachineCommand implements CommandExecutor {
                 backupFile = new File(plugin.backups.getAbsolutePath() + File.separator + args[2]);
                 if(backupFile.exists()){
                     try {
-                        sender.sendMessage(ChatColor.DARK_AQUA + " Server is restoring to " + backupFile.getName());
+                        sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Server is restoring to " + backupFile.getName());
                         Restore.server(plugin, backupFile);
-                        sender.sendMessage(ChatColor.GREEN + "[SUCCESS]" + ChatColor.DARK_AQUA + " Server was restored to " + backupFile.getName());
-                        sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Server restarting in 5 seconds...");
+                        Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[SUCCESS]" + ChatColor.DARK_AQUA + " Server was restored to " + backupFile.getName());
+                        Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Server restarting in 5 seconds...");
                         plugin.restartServer();
                     }catch(Exception e){
                         sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Restore failed. stack trace printed in console");
-                        Log.error(e.getMessage());
+                        Bukkit.getServer().getConsoleSender().sendMessage(e.getMessage());
                     }
                 }
                 else {
@@ -78,12 +91,83 @@ public class TimeMachineCommand implements CommandExecutor {
                 }
             }
             else if(args[1].equalsIgnoreCase("world")){
+                String world = args[2];
+                switch (world){
+                    case "overworld":
+                        world = "world";
+                        break;
+                    case "the_nether":
+                        world = "world_nether";
+                        break;
+                    case "the_end":
+                        world = "world_end";
+                        break;
+                }
+                backupFile = new File(plugin.backups.getAbsolutePath() + File.separator + args[3]);
+                if(backupFile.exists()){
+                    try{
+                        sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Restore World: restoring " + world + " to " + backupFile.getName());
+                        Restore.world(plugin, backupFile, world);
+                        Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[SUCCESS]" + ChatColor.DARK_AQUA + " Restore World: restored " + world + " to " + backupFile.getName());
+                        Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Server restarting in 5 seconds...");
+                        plugin.restartServer();
+                    }catch (Exception e){
+                        sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Restore failed. Stack trace printed in console");
+                        Bukkit.getServer().getConsoleSender().sendMessage(e.getMessage());
+                    }
+                }
 
             }
             else if(args[1].equalsIgnoreCase("player")){
+                String player = args[2];
+                String part = args[3];
+                backupFile = new File(plugin.backups.getAbsolutePath() + File.separator + args[4]);
+                if(backupFile.exists()){
+                    try{
+                        sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Restore Player: restoring " + player + " to " + backupFile.getName());
+                        Restore.player(plugin, backupFile, player, part);
+                        Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[SUCCESS]" + ChatColor.DARK_AQUA + " Restore Player: restored " + player + " to " + backupFile.getName());
+                        Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Server restarting in 5 seconds...");
+                        plugin.restartServer();
+                    }catch (Exception e){
+                        sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Restore failed. Stack trace printed in console");
+                        Bukkit.getServer().getConsoleSender().sendMessage(e.getMessage());
+                    }
+                }
 
             }
             else if(args[1].equalsIgnoreCase("chunk")){
+                String world = args[2];
+                int[][] chunks;
+                String[] tempChunks = args[3].split("\\|");
+                chunks = new int[tempChunks.length][2];
+                for(int i = 0; i < tempChunks.length; i++){
+                    String[] temp = tempChunks[i].split(",");
+                    for(int j = 0; j < 2; j++){
+                        try{
+                            chunks[i][j] = Integer.parseInt(temp[j]);
+                        }catch (NumberFormatException e){
+                            sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Restore failed. Stack trace printed in console");
+                            Bukkit.getServer().getConsoleSender().sendMessage(e.getMessage());
+                        }
+                    }
+                    sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " " + chunks[i][0] + "," + chunks[i][1]);
+                }
+
+
+//                backupFile = new File(plugin.backups.getAbsolutePath() + File.separator + args[4]);
+//                if(backupFile.exists()){
+//                    try{
+//                        sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Restore Chunk: restoring chunks in " + world + " to " + backupFile.getName());
+//                        Restore.chunk(plugin, backupFile, world, );
+//                        sender.sendMessage(ChatColor.GREEN + "[SUCCESS]" + ChatColor.DARK_AQUA + " Restore Chunk: restored chunks in " + world + " to " + backupFile.getName());
+//                        sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Server restarting in 5 seconds...");
+//                        plugin.restartServer();
+//                    }catch (Exception e){
+//                        sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Restore failed. Stack trace printed in console");
+//                        Bukkit.getServer().getConsoleSender().sendMessage(e.getMessage());
+//                    }
+//                }
 
             }
             return true;

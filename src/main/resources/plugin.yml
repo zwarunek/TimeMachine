@@ -1,6 +1,6 @@
 name: TimeMachine
 author: Warunek
-main: com.warunek.timemachine.TimeMachine
+main: com.github.warunek.timemachine.TimeMachine
 version: 1.0.0
 api-version: 1.13
 load: STARTUP

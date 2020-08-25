@@ -21,3 +21,6 @@ backupNameFormat: 'Server-Backup-%date%'
 
 # Format that the date will be presented. For syntax, consult https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html
 dataFormat: 'yyyy-MM-dd_HH-mm-ss'
+
+# IF you want full player saves that are in that world to be rolled back or not(Location will always be rolled back)
+restorePlayerWithWorld: false

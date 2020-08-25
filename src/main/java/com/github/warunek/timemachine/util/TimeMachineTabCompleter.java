@@ -54,9 +54,10 @@ public class TimeMachineTabCompleter implements TabCompleter {
                         case "server":
                             list = getBackupFiles(list, args[2]);
                             break;
-                        case "chunk":
                         case "world":
-                            commands = new String[]{"overworld", "the_nether", "the_end", "all"};
+                            list.add("all");
+                        case "chunk":
+                            commands = new String[]{"overworld", "the_nether", "the_end"};
                             for (String f : commands) {
                                 if (f.toLowerCase().startsWith(args[2].toLowerCase()))
                                     list.add(f);
