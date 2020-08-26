@@ -3,6 +3,10 @@ package com.github.warunek.timemachine;
 import com.github.steveice10.opennbt.NBTIO;
 import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
 import com.github.steveice10.opennbt.tag.builtin.ListTag;
+import com.github.steveice10.opennbt.tag.builtin.Tag;
+import com.github.warunek.timemachine.util.RegionFile;
+import com.github.warunek.timemachine.util.TagUtils;
+import com.mojang.nbt.NbtIo;
 import com.sun.istack.internal.Nullable;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -13,6 +17,8 @@ import net.lingala.zip4j.model.enums.CompressionLevel;
 import net.lingala.zip4j.progress.ProgressMonitor;
 import net.lingala.zip4j.util.InternalZipConstants;
 import net.lingala.zip4j.util.Zip4jUtil;
+import net.minecraft.server.v1_16_R2.DataConverterObjectiveDisplayName;
+import net.minecraft.server.v1_16_R2.TagUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.bukkit.inventory.Inventory;
@@ -20,6 +26,7 @@ import org.bukkit.inventory.Inventory;
 import java.io.*;
 import java.lang.reflect.Array;
 import java.net.FileNameMap;
+import java.nio.channels.FileLock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,6 +50,22 @@ public class TestClass {
     public static void main(String[] args) throws IOException, InterruptedException {
         excludedFolders = Arrays.asList("backups", "cache", "logs");
         excludedExtensions = Arrays.asList("jar", "bat");
+        int [][] chunks = new int[][]{
+                {0, 0},
+                {1, 0},
+                {1, -1},
+                {1, -2}};
+//        System.out.println("r." + (chunks[0][0] >> 5) + "." + (chunks[0][1] >> 5) + ".mca");
+//        int x = chunks[0][0] % (32);
+//        int y = chunks[0][1] % (32);
+//        System.out.println((x<0?x+32:x) + ", " + (y<0?y+32:y));
+//        net.minecraft.world.level.chunk.storage.RegionFile test = new RegionFile(new File("C:\\Users\\zacha\\Desktop\\testServer\\world\\region\\r.0.0.mca"));
+//        net.minecraft.world.level.chunk.storage.RegionFile backed = new RegionFile(new File("C:\\Users\\zacha\\Desktop\\testServer\\backups\\r.0.0.mca"));
+//        com.mojang.nbt.CompoundTag tag = NbtIo.read(backed.getChunkDataInputStream((x<0?x+32:x),(y<0?y+32:y)));
+//        NbtIo.write(tag, test.getChunkDataOutputStream((x<0?x+32:x),(y<0?y+32:y)));
+//        System.out.println(((CompoundTag)NBTIO.readTag((InputStream) test.getChunkDataInputStream((x<0?x+32:x),(y<0?y+32:y)))).get("DataVersion"));
+//        System.out.println(new MinecraftRegion(new File("C:\\Users\\zacha\\Desktop\\testServer\\world\\region\\r.0.0.mca")).getChunk(-1, -1).getBlockID(0, 0, 0));
+//        System.out.println(Arrays.toString(chunks[0]));
 //        String playerUUID = "all";\
 //        ZipFile zip = new ZipFile(fileZip);
 //        System.out.println(zip.getFileHeaders().toString());
@@ -58,8 +81,8 @@ public class TestClass {
 //        System.out.println(Arrays.toString(new File(delFolder).listFiles((dir1, name) -> !name.equalsIgnoreCase("playerData") && !name.equalsIgnoreCase("advancements"))));
 //            unzip(fileZip, backupDir, Arrays.asList("advancements", "playerdata"), "world");
 //        zip(backupDir, dir);
-
-        restorePlayer(fileZip, playerUUID, "enderchest");
+        restoreChunk(fileZip, "world", chunks);
+//        restorePlayer(fileZip, playerUUID, "enderchest");
 //        restoreWorld(fileZip, "world");
 //        restoreServer(fileZip);
 
@@ -69,6 +92,44 @@ public class TestClass {
 //            FileUtils.forceDelete(file1);
 //            System.out.println(FilenameUtils.getExtension(file1.getName()));
 //        }
+    }
+    public static void restoreChunk(String backup,String world, int[][] chunks) throws IOException, InterruptedException {
+        for(int[] chunk : chunks) {
+            String regionFileName = "r." + (chunk[0] >> 5) + "." + (chunk[1] >> 5) + ".mca";
+            File currentFile = null;
+            int x = chunks[0][0] % (32);
+            int y = chunks[0][1] % (32);
+            CompoundTag currentTag;
+            RegionFile regionFile;
+            currentFile = new File(del + File.separator + "region" + File.separator + regionFileName);
+            if(!currentFile.exists()){
+                System.out.println("Handle this exception");
+                return;
+            }
+            regionFile = new RegionFile(currentFile);
+
+            ZipFile zip = new ZipFile(backup);
+            zip.setRunInThread(false);
+            try {
+                zip.extractFile(new File(mainDir).getName() + "/world/region/" + regionFileName, backupDir, regionFileName);
+            }catch (ZipException e){
+//                HANDLE ERROR: Chunk File not backed up
+                System.out.println("HANDLE ERROR: Chunk File not backed up");
+                return;
+            }
+            File backedFile = new File(backupDir + File.separator + regionFileName);
+            DataOutputStream stream = regionFile.getChunkDataOutputStream((x<0?x+32:x),(y<0?y+32:y));
+            RegionFile region = new RegionFile(backedFile);
+            DataInputStream in = region.getChunkDataInputStream((x<0?x+32:x),(y<0?y+32:y));
+
+            Tag tag =  NBTIO.readTag((InputStream) in);
+            NBTIO.writeTag((OutputStream) stream, tag);
+            stream.flush();
+            stream.close();
+
+            in.close();
+            FileUtils.forceDelete(new File(backupDir + File.separator + regionFileName));
+        }
     }
     public static void restorePlayer(String backup, String player, String part) throws IOException, InterruptedException {
         switch(part.toLowerCase()){
@@ -114,6 +175,7 @@ public class TestClass {
                         NBTIO.writeFile(currentTag, del + File.separator + "playerdata" + File.separator + uuid);
                     }
                 }
+                FileUtils.forceDelete(new File(backupDir + File.separator + "TempPlayerFiles"));
             }
         }
         else{
@@ -134,7 +196,7 @@ public class TestClass {
                 CompoundTag currentTag = NBTIO.readFile(del + File.separator + "playerdata" + File.separator + playerUUID +".dat");
                 currentTag.put(backedTag.get(part));
                 NBTIO.writeFile(currentTag, del + File.separator + "playerdata" + File.separator + playerUUID +".dat");
-
+                FileUtils.forceDelete(new File(backupDir + File.separator + "TempPlayerFile.dat"));
             }
 
         }

@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="opennbt-1.4-SNAPSHOT-javadoc">
+    <CLASSES />
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/Desktop/OpenNBT-master (1)/OpenNBT-master/target/opennbt-1.4-SNAPSHOT-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/Desktop/OpenNBT-master (1)/OpenNBT-master/target/opennbt-1.4-SNAPSHOT-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
