@@ -25,7 +25,7 @@ public class TimeMachineCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         File backupFile;
         if(!sender.hasPermission("timemachine")){
-            sender.sendMessage(ChatColor.DARK_PURPLE + "You do not have permission to use this command.");
+            sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " You do no have permission to use this command");
 
             return true;
         }

@@ -22,7 +22,6 @@ public class TimeMachine extends JavaPlugin{
     public File mainDir;
     public File playerDataDir;
     public File pluginDir;
-    public static FileFilter datFilefilter;
     public String backupPath;
     public String backupNameFormat;
     public SimpleDateFormat dateFormat;
@@ -30,91 +29,34 @@ public class TimeMachine extends JavaPlugin{
     public boolean isRestoring = false;
     public boolean isBackingUp = false;
     public boolean restorePlayerWithWorld;
-    public List<String> backupFilePaths = new ArrayList<>();
+    public List<String> backupFolderExceptions;
+    public List<String> backupExtensionExceptions;
     public BukkitRunnable autobackupRunnable;
-    public ArrayList<String> exempt;
     public final String version = this.getDescription().getVersion();
     public final List<String> author = this.getDescription().getAuthors();
 
-    public Object getConfigValue(String path, Object defPath){
-        if(getConfig().contains(path))
-            return getConfig().get(path);
-        saveConfig = true;
-        getConfig().set(path, defPath);
-        return defPath;
-    }
-
-//    public static void main(String[] args){
-//        String backupDir= ("C:\\Users\\zacha\\Desktop\\1.16.2 server\\backups\\");
-//        String fileZip = ("C:\\Users\\zacha\\Desktop\\1.16.2 server\\backups\\Server_Backup_2020-08-24_14-31-38.zip");
-//        unzip(fileZip, backupDir);
-//
-//
-//    }
-    private static void unzip(String zipFilePath, String destDir) {
-        File dir = new File(destDir);
-        // create output directory if it doesn't exist
-        if(!dir.exists()) dir.mkdirs();
-        FileInputStream fis;
-        //buffer for read and write data to file
-        byte[] buffer = new byte[1024];
-        try {
-            fis = new FileInputStream(zipFilePath);
-            ZipInputStream zis = new ZipInputStream(fis);
-            ZipEntry ze = zis.getNextEntry();
-            while(ze != null){
-                String fileName = ze.getName();
-
-//                File newFile = new File(destDir + File.separator + fileName);
-                File newFile = new File(fileName);
-                //create directories for sub directories in zip
-                File parent = new File(newFile.getParent());
-                if(parent.getName().equalsIgnoreCase("playerdata")) {
-                    newFile = new File(destDir + File.separator + parent.getName() + File.separator + newFile.getName());
-                    System.out.println("Unzipping to "+newFile.getAbsolutePath());
-                    new File(newFile.getParent()).mkdirs();
-                    FileOutputStream fos = new FileOutputStream(newFile);
-                    int len;
-                    while ((len = zis.read(buffer)) > 0) {
-                        fos.write(buffer, 0, len);
-                    }
-                    fos.close();
-                }
-                //close this ZipEntry
-                zis.closeEntry();
-                ze = zis.getNextEntry();
-            }
-            //close last ZipEntry
-            zis.closeEntry();
-            zis.close();
-            fis.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
 
     @Override
     public void onEnable() {
         displayBanner();
-        getConfig().options().copyDefaults();
+        getConfig().options().copyDefaults(true);
         saveDefaultConfig();
         mainDir = getDataFolder().getAbsoluteFile().getParentFile().getParentFile();
         playerDataDir = new File(mainDir.getAbsolutePath() + File.separator + "world" + File.separator + "playerdata");
         pluginDir = new File(mainDir.getAbsolutePath() + File.separator + "plugins");
-        backupPath = (String)getConfigValue("backupFolderDirectory", "");
+        backupPath =  getConfig().getString("backupFolderDirectory", "");
         backups = new File(mainDir + backupPath + File.separator + "backups" + File.separator);
-        exempt = (ArrayList<String>) getConfigValue("backupExceptions", new String[]{"logs"});
-        autoBackupFrequency = (int) getConfigValue("autoBackupFrequency", 1440);
-        backupNameFormat = (String) getConfigValue("backupNameFormat", "Server Backup %date%");
-        dateFormat = new SimpleDateFormat((String)getConfigValue("dateFormat", "yyyy-MM-dd_HH-mm-ss"));
-        restorePlayerWithWorld = (boolean) getConfigValue("restorePlayerWithWorld", false);
+        autoBackupFrequency = getConfig().getInt("autoBackupFrequency");
+        backupNameFormat =getConfig().getString("backupNameFormat");
+        dateFormat = new SimpleDateFormat(getConfig().getString("dateFormat"));
+        restorePlayerWithWorld = getConfig().getBoolean("restorePlayerWithWorld");
+        backupExtensionExceptions = (List<String>)getConfig().getList("backupExtensionExceptions");
+        backupFolderExceptions = (List<String>)getConfig().getList("backupFolderExceptions");
 
         final TimeMachineCommand command = new TimeMachineCommand(this);
         final TimeMachineTabCompleter tabCompleter = new TimeMachineTabCompleter(this);
         getCommand("timemachine").setExecutor(command);
         getCommand("timemachine").setTabCompleter(tabCompleter);
-        datFilefilter = file -> file.getName().endsWith(".dat");
         if(!backups.exists())
             backups.mkdir();
     }

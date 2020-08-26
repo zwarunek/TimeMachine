@@ -39,19 +39,17 @@ public class Backup {
     public static void backup(final TimeMachine instance, CommandSender sender) throws Exception {
         plugin = instance;
         Backup.sender = sender;
-        List<World> autosave = new ArrayList<>();
         Bukkit.savePlayers();
         for (World loaded : Bukkit.getWorlds()) {
             try {
                 loaded.save();
                 if (loaded.isAutoSave()) {
-                    autosave.add(loaded);
                     loaded.setAutoSave(false);
                 }
 
-            } catch (Exception e) {}
+            } catch (Exception ignored) {}
         }
-        Player player = null;
+        Player player;
         BossBar bar = Bukkit.createBossBar(ChatColor.DARK_AQUA + "Backing Up Server", BarColor.GREEN, BarStyle.SOLID);
         if(sender instanceof Player) {
             player = (Player) sender;
@@ -89,69 +87,69 @@ public class Backup {
         },0, 5);
     }
 
-    private static void findSrcFiles(String path, String srcFile, ZipOutputStream zip) {
-        try {
-            File folder = new File(srcFile);
-
-            if (folder.isDirectory()) {
-                findSrcFolders(path, srcFile, zip);
-            } else {
-                if (folder.getName().endsWith("jar")) {
-                    if (path.contains("plugins") && (!plugin.savePluginJars) || (!path.contains("plugins") && (!plugin.saveServerJar))) {
-                        return;
-                    }
-                }
-                String substring = path.substring(path.lastIndexOf(File.separator) + 1);
-                if((plugin.exempt.contains(substring)) || "backups".equalsIgnoreCase(substring)){
-                    return;
-                }
-
-                byte[] buf = new byte['?'];
-
-                FileInputStream in = new FileInputStream(srcFile);
-                zip.putNextEntry(new ZipEntry(path + File.separator + folder.getName()));
-                int len;
-                while ((len = in.read(buf)) > 0) {
-                    zip.write(buf, 0, len);
-                }
-                in.close();
-            }
-
-        }catch (Exception e){
-        }
-    }
-    private static void findSrcFolders(String path, String srcFolder, ZipOutputStream zip) {
-
-        try {
-            File folder = new File(srcFolder);
-            String[] arrayOfString;
-            int j = (arrayOfString = folder.list()).length;
-            for (int i = 0; i < j; i++) {
-                if((!path.toLowerCase().contains("backups")) && (!plugin.exempt.contains(path.substring(path.lastIndexOf(File.separator) + 1)))) {
-                    String fileName = arrayOfString[i];
-                    if (path.equals("")) {
-                        findSrcFiles(folder.getName(), srcFolder + File.separator + fileName, zip);
-                    } else {
-                        findSrcFiles(path + File.separator + folder.getName(), srcFolder + File.separator + fileName, zip);
-                    }
-                }
-            }
-        } catch (Exception e) {
-        }
-    }
-
-    private static void zipFolder(String srcFolder, String destZipFile) throws Exception {
-        ZipOutputStream zip = null;
-        FileOutputStream fileWriter = null;
-
-        fileWriter = new FileOutputStream(destZipFile);
-        zip = new ZipOutputStream(fileWriter);
-
-
-        zip.setLevel(9);
-
-        findSrcFolders("", srcFolder, zip);
-        zip.flush();
-        zip.close();
-    }
+//    private static void findSrcFiles(String path, String srcFile, ZipOutputStream zip) {
+//        try {
+//            File folder = new File(srcFile);
+//
+//            if (folder.isDirectory()) {
+//                findSrcFolders(path, srcFile, zip);
+//            } else {
+//                if (folder.getName().endsWith("jar")) {
+//                    if (path.contains("plugins") && (!plugin.savePluginJars) || (!path.contains("plugins") && (!plugin.saveServerJar))) {
+//                        return;
+//                    }
+//                }
+//                String substring = path.substring(path.lastIndexOf(File.separator) + 1);
+//                if((plugin.exempt.contains(substring)) || "backups".equalsIgnoreCase(substring)){
+//                    return;
+//                }
+//
+//                byte[] buf = new byte['?'];
+//
+//                FileInputStream in = new FileInputStream(srcFile);
+//                zip.putNextEntry(new ZipEntry(path + File.separator + folder.getName()));
+//                int len;
+//                while ((len = in.read(buf)) > 0) {
+//                    zip.write(buf, 0, len);
+//                }
+//                in.close();
+//            }
+//
+//        }catch (Exception e){
+//        }
+//    }
+//    private static void findSrcFolders(String path, String srcFolder, ZipOutputStream zip) {
+//
+//        try {
+//            File folder = new File(srcFolder);
+//            String[] arrayOfString;
+//            int j = (arrayOfString = folder.list()).length;
+//            for (int i = 0; i < j; i++) {
+//                if((!path.toLowerCase().contains("backups")) && (!plugin.exempt.contains(path.substring(path.lastIndexOf(File.separator) + 1)))) {
+//                    String fileName = arrayOfString[i];
+//                    if (path.equals("")) {
+//                        findSrcFiles(folder.getName(), srcFolder + File.separator + fileName, zip);
+//                    } else {
+//                        findSrcFiles(path + File.separator + folder.getName(), srcFolder + File.separator + fileName, zip);
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//        }
+//    }
+//
+//    private static void zipFolder(String srcFolder, String destZipFile) throws Exception {
+//        ZipOutputStream zip = null;
+//        FileOutputStream fileWriter = null;
+//
+//        fileWriter = new FileOutputStream(destZipFile);
+//        zip = new ZipOutputStream(fileWriter);
+//
+//
+//        zip.setLevel(9);
+//
+//        findSrcFolders("", srcFolder, zip);
+//        zip.flush();
+//        zip.close();
+//    }
 }
