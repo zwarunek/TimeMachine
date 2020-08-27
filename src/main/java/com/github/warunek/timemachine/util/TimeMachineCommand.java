@@ -5,13 +5,17 @@ import com.github.warunek.timemachine.commands.Backup;
 import com.github.warunek.timemachine.commands.Restore;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Date;
 
 public class TimeMachineCommand implements CommandExecutor {
@@ -30,13 +34,13 @@ public class TimeMachineCommand implements CommandExecutor {
             return true;
         }
         if(args.length == 0){
-            sender.sendMessage(ChatColor.AQUA + "---===###-Time Machine-###===---\n " + ChatColor.RESET +
+            sender.sendMessage(ChatColor.DARK_AQUA + "---===###-Time Machine-###===---\n " + ChatColor.RESET +
                     "/tm backup : Starts a backup of the server\n" +
                     "/tm restore server <backup> : restores all server files\n" +
                     "/tm restore world <world:all> <backup> : restores selected world files\n" +
-                    "/tm restore player <player:all> <backup> : restores selected player's save file\n" + ChatColor.GRAY +
-                    "/tm restore pluginconfig <plugin:all> <backup> : Restores plugin files of selected plugin" +
-                    "/tm disableAutoSaver : Disables the autosaver");
+                    "/tm restore player <player:all> <backup> : restores selected player's save file\n" +
+                    "/tm restore chunk <world> <x,z|x,z|...> <backup> : Restores chunks to backup\n" + ChatColor.GRAY +
+                    "/tm autosave <enable:disable> <nM,H,D> : Enables or disables the autosave feature **Not supported yet");
             return true;
         }
         if(args[0].equalsIgnoreCase("backup")){
@@ -91,16 +95,9 @@ public class TimeMachineCommand implements CommandExecutor {
             }
             else if(args[1].equalsIgnoreCase("world")){
                 String world = args[2];
-                switch (world){
-                    case "overworld":
-                        world = "world";
-                        break;
-                    case "the_nether":
-                        world = "world_nether";
-                        break;
-                    case "the_end":
-                        world = "world_end";
-                        break;
+                if(Bukkit.getWorld(world) == null){
+                    sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " World not found");
+                    return true;
                 }
                 backupFile = new File(plugin.backups.getAbsolutePath() + File.separator + args[3]);
                 if(backupFile.exists()){
@@ -119,18 +116,29 @@ public class TimeMachineCommand implements CommandExecutor {
             }
             else if(args[1].equalsIgnoreCase("player")){
                 String player = args[2];
+                String playerUUID = "";
                 String part = args[3];
                 backupFile = new File(plugin.backups.getAbsolutePath() + File.separator + args[4]);
+                boolean playerExists = false;
+                for(OfflinePlayer p : Bukkit.getOfflinePlayers())
+                    if(p.getName() != null && p.getName().equalsIgnoreCase(player)){
+                        playerExists = true;
+                        playerUUID = p.getUniqueId().toString();
+                    }
+
+                if(!playerExists){
+                    sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Player not found");
+                    return true;
+                }
                 if(backupFile.exists()){
                     try{
                         sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Restore Player: restoring " + player + " to " + backupFile.getName());
-                        Restore.player(plugin, backupFile, player, part);
+                        Restore.player(plugin, backupFile, playerUUID, part);
                         Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[SUCCESS]" + ChatColor.DARK_AQUA + " Restore Player: restored " + player + " to " + backupFile.getName());
-                        Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Server restarting in 5 seconds...");
-                        plugin.restartServer();
                     }catch (Exception e){
                         sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Restore failed. Stack trace printed in console");
                         Bukkit.getServer().getConsoleSender().sendMessage(e.getMessage());
+                        return true;
                     }
                 }
 
@@ -146,6 +154,10 @@ public class TimeMachineCommand implements CommandExecutor {
                     return true;
                 }
                 String world = args[2];
+                if(Bukkit.getWorld(world) == null){
+                    sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " World not found");
+                    return true;
+                }
                 int[][] chunks;
                 String[] tempChunks = args[3].split("\\|");
                 chunks = new int[tempChunks.length][2];

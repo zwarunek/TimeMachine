@@ -29,6 +29,7 @@ public class Restore {
 
 
     public static void player(TimeMachine plugin, File backup, String player, String part) throws IOException, InterruptedException {
+        prepareServer(plugin, player, "Restoring your playersave to a previous backup");
         String backupDir = backup.getParent();
         switch(part.toLowerCase()){
             case "inventory":
@@ -103,16 +104,20 @@ public class Restore {
     }
     public static void world(TimeMachine plugin, File backup, String worlds) throws IOException, InterruptedException {
         //Kick all players
-        prepareServer(plugin, "all", "The server is restoring to a previous backup");
+        try {
+            prepareServer(plugin, "all", "The server is restoring to a previous backup");
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
 
-        ArrayList<String> worldNameList = new ArrayList<>();
+        List<String> worldNameList = new ArrayList<>();
         if(worlds.equalsIgnoreCase("all"))
             for(World world : Bukkit.getWorlds()){
                 worldNameList.add(world.getWorldFolder().getName());
             }
 
         else
-            worldNameList = (ArrayList<String>) Arrays.asList(worlds);
+            worldNameList = Arrays.asList(worlds);
 
         for(String worldName : worldNameList) {
             String dest = plugin.mainDir.getParent();
@@ -128,17 +133,15 @@ public class Restore {
         String backupDir = backup.getParent();
         for(int[] chunk : chunks) {
             String regionFileName = "r." + (chunk[0] >> 5) + "." + (chunk[1] >> 5) + ".mca";
-            File currentFile = null;
-            int x = chunks[0][0] % (32);
-            int y = chunks[0][1] % (32);
-            CompoundTag currentTag;
-            RegionFile regionFile;
+            File currentFile;
+            int x = chunk[0] % (32);
+            int y = chunk[1] % (32);
+
             currentFile = new File(plugin.mainDir.getAbsolutePath() + File.separator + world + File.separator + "region" + File.separator + regionFileName);
             if(!currentFile.exists()){
                 System.out.println("Handle this exception");
                 return;
             }
-            regionFile = new RegionFile(currentFile);
 
             ZipFile zip = new ZipFile(backup);
             zip.setRunInThread(false);
@@ -150,9 +153,8 @@ public class Restore {
                 return;
             }
             File backedFile = new File(backupDir + File.separator + regionFileName);
-            DataOutputStream stream = regionFile.getChunkDataOutputStream((x<0?x+32:x),(y<0?y+32:y));
-            RegionFile region = new RegionFile(backedFile);
-            DataInputStream in = region.getChunkDataInputStream((x<0?x+32:x),(y<0?y+32:y));
+            DataOutputStream stream = new RegionFile(currentFile).getChunkDataOutputStream((x<0?x+32:x),(y<0?y+32:y));
+            DataInputStream in = new RegionFile(backedFile).getChunkDataInputStream((x<0?x+32:x),(y<0?y+32:y));
 
             Tag tag =  NBTIO.readTag((InputStream) in);
             NBTIO.writeTag((OutputStream) stream, tag);
@@ -211,9 +213,6 @@ public class Restore {
             if (isSame || playerName.equalsIgnoreCase("all")) {
                 player.kickPlayer(ChatColor.GREEN + message);
             }
-            if(isSame && !playerName.equalsIgnoreCase("all")){
-                return;
-            }
         }
         for (Plugin p : Bukkit.getPluginManager().getPlugins()) {
             if (p != plugin) {
@@ -226,15 +225,6 @@ public class Restore {
         }
         //Unload all worlds.
 
-        for (World loaded : Bukkit.getWorlds()) {
-            try {
-                loaded.save();
-                if (loaded.isAutoSave()) {
-                    loaded.setAutoSave(false);
-                }
-
-            } catch (Exception ignored) {}
-        }
         for (World w : Bukkit.getWorlds()) {
             w.save();
             if (w.isAutoSave()) {

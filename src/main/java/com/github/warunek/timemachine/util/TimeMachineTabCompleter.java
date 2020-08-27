@@ -5,6 +5,7 @@ import com.github.warunek.timemachine.TimeMachine;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -12,6 +13,7 @@ import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,18 +29,18 @@ public class TimeMachineTabCompleter implements TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 
         List<String> list = new ArrayList<>();
-        String[] commands;
+        List<String> commands = new ArrayList<>();
 
         switch (args.length) {
             case 1:
-                commands = new String[]{"backup", "restore", "deletebackup"};
+                commands = Arrays.asList("backup", "restore", "deletebackup");
                 for (String f : commands)
                     if (f.toLowerCase().startsWith(args[0].toLowerCase()))
                         list.add(f);
                 return list;
             case 2:
                 if (args[0].equalsIgnoreCase("restore")) {
-                    commands = new String[]{"server", "world", "player", "chunk"};
+                    commands = Arrays.asList("server", "world", "player", "chunk");
                     for (String f : commands)
                         if (f.toLowerCase().startsWith(args[1].toLowerCase()))
                             list.add(f);
@@ -57,7 +59,10 @@ public class TimeMachineTabCompleter implements TabCompleter {
                         case "world":
                             list.add("all");
                         case "chunk":
-                            commands = new String[]{"overworld", "the_nether", "the_end"};
+                            System.out.println(Bukkit.getWorlds().size());
+                            for(World world : Bukkit.getWorlds()){
+                                commands.add(world.getName());
+                            }
                             for (String f : commands) {
                                 if (f.toLowerCase().startsWith(args[2].toLowerCase()))
                                     list.add(f);
@@ -82,7 +87,7 @@ public class TimeMachineTabCompleter implements TabCompleter {
                         getBackupFiles(list, args[3]);
                     }
                     else if (args[1].equalsIgnoreCase("player") && args[2] != null) {
-                        commands = new String[]{"all", "inventory", "enderchest"};
+                        commands = Arrays.asList("all", "inventory", "enderchest");
                         for (String f : commands) {
                             if (f.toLowerCase().startsWith(args[3].toLowerCase()))
                                 list.add(f);

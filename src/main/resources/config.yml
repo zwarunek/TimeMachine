@@ -30,4 +30,4 @@ backupNameFormat: 'Server-Backup-%date%'
 dateFormat: 'yyyy-MM-dd_HH-mm-ss'
 
 # IF you want full player saves that are in that world to be rolled back or not(Location will always be rolled back)
-restorePlayerWithWorld: false
+restorePlayerWithWorld: true
