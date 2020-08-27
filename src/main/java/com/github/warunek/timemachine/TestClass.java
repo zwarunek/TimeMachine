@@ -1,39 +1,18 @@
 package com.github.warunek.timemachine;
 
+
 import com.github.steveice10.opennbt.NBTIO;
 import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
-import com.github.steveice10.opennbt.tag.builtin.ListTag;
 import com.github.steveice10.opennbt.tag.builtin.Tag;
+import com.github.warunek.timemachine.commands.Restore;
 import com.github.warunek.timemachine.util.RegionFile;
-import com.github.warunek.timemachine.util.TagUtils;
-import com.mojang.nbt.NbtIo;
-import com.sun.istack.internal.Nullable;
 import net.lingala.zip4j.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.model.ExcludeFileFilter;
-import net.lingala.zip4j.model.FileHeader;
-import net.lingala.zip4j.model.ZipParameters;
-import net.lingala.zip4j.model.enums.CompressionLevel;
-import net.lingala.zip4j.progress.ProgressMonitor;
-import net.lingala.zip4j.util.InternalZipConstants;
-import net.lingala.zip4j.util.Zip4jUtil;
-import net.minecraft.server.v1_16_R2.DataConverterObjectiveDisplayName;
-import net.minecraft.server.v1_16_R2.TagUtil;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.bukkit.inventory.Inventory;
 
 import java.io.*;
-import java.lang.reflect.Array;
-import java.net.FileNameMap;
-import java.nio.channels.FileLock;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.ThreadFactory;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.zip.ZipException;
 
 public class TestClass {
     public static List<String> excludedFolders;
@@ -88,10 +67,6 @@ public class TestClass {
 
 //        unzip(fileZip, desk, folder, del, );
         System.exit(0);
-//        for(File file1 : new File(del).listFiles((dir1, name) -> !name.equalsIgnoreCase("playerData") && !name.equalsIgnoreCase("advancements"))) {
-//            FileUtils.forceDelete(file1);
-//            System.out.println(FilenameUtils.getExtension(file1.getName()));
-//        }
     }
     public static void restoreChunk(String backup,String world, int[][] chunks) throws IOException, InterruptedException {
         for(int[] chunk : chunks) {
@@ -110,13 +85,7 @@ public class TestClass {
 
             ZipFile zip = new ZipFile(backup);
             zip.setRunInThread(false);
-            try {
-                zip.extractFile(new File(mainDir).getName() + "/world/region/" + regionFileName, backupDir, regionFileName);
-            }catch (ZipException e){
-//                HANDLE ERROR: Chunk File not backed up
-                System.out.println("HANDLE ERROR: Chunk File not backed up");
-                return;
-            }
+            zip.extractFile(new File(mainDir).getName() + "/world/region/" + regionFileName, backupDir, regionFileName);
             File backedFile = new File(backupDir + File.separator + regionFileName);
             DataOutputStream stream = regionFile.getChunkDataOutputStream((x<0?x+32:x),(y<0?y+32:y));
             RegionFile region = new RegionFile(backedFile);
@@ -131,165 +100,157 @@ public class TestClass {
             FileUtils.forceDelete(new File(backupDir + File.separator + regionFileName));
         }
     }
-    public static void restorePlayer(String backup, String player, String part) throws IOException, InterruptedException {
-        switch(part.toLowerCase()){
-            case "inventory":
-                part = "Inventory";
-                break;
-            case "enderchest":
-                part = "EnderItems";
-                break;
-        }
-        if(player.equalsIgnoreCase("all")){
-            if(part.equalsIgnoreCase("all")) {
-                String dest = new File(mainDir).getParent();
-                String folder = (new File(mainDir).getName() + "/world/playerdata/");
-                String del = mainDir + File.separator + "world" + File.separator + "playerdata";
-                List<String> filter = new ArrayList<String>();
-                unzip(backup, dest, folder, del, filter);
-                folder = (new File(mainDir).getName() + "/world/advancements/");
-                del = mainDir + File.separator + "world" + File.separator + "advancements";
-                unzip(backup, dest, folder, del, filter);
-            }
-            else{
-                ZipFile zip = new ZipFile(backup);
-                zip.extractFile(new File(mainDir).getName() + "/world/playerdata/", backupDir, "TempPlayerFiles");
-
-                FilenameFilter fileNameFilter = (dir, name) -> name.endsWith(".dat");
-
-                File currentPlayerdata = new File(del + File.separator + "playerdata");
-                String[] currentPlayers = Objects.requireNonNull(currentPlayerdata.list(fileNameFilter));
-
-                File backedPlayerdata = new File(backupDir + File.separator + "TempPlayerFiles");
-                List<String> backedPlayers = Arrays.asList(Objects.requireNonNull(backedPlayerdata.list(fileNameFilter)));
-
-                for(String playerFile : currentPlayers){
-                    String uuid = new File(playerFile).getName();
-                    CompoundTag currentTag = NBTIO.readFile(del + File.separator + "playerdata" + File.separator + uuid);
-                    currentTag.put(new ListTag(part));
-
-                    if(backedPlayers.contains(uuid)) {
-
-                        CompoundTag backedTag = NBTIO.readFile(backupDir + File.separator + "TempPlayerFiles" + File.separator + uuid);
-                        currentTag.put(backedTag.get(part));
-                        NBTIO.writeFile(currentTag, del + File.separator + "playerdata" + File.separator + uuid);
-                    }
-                }
-                FileUtils.forceDelete(new File(backupDir + File.separator + "TempPlayerFiles"));
-            }
-        }
-        else{
-            if(part.equalsIgnoreCase("all")) {
-                String dest = new File(mainDir).getParent();
-                String folder = (new File(mainDir).getName() + "/world/playerdata/" + player + ".dat");
-                List<String> filter = new ArrayList<String>();
-                unzip(backup, dest, folder, null, filter);
-                folder = (new File(mainDir).getName() + "/world/playerdata/" + player + ".dat_old");
-                unzip(backup, dest, folder, null, filter);
-                folder = (new File(mainDir).getName() + "/world/advancements/" + player + ".json");
-                unzip(backup, dest, folder, null, filter);
-            }
-            else{
-                ZipFile zip = new ZipFile(backup);
-                zip.extractFile(new File(mainDir).getName() + "/world/playerdata/" + player + ".dat", backupDir, "TempPlayerFile.dat");
-                CompoundTag backedTag = NBTIO.readFile(backupDir + File.separator + "TempPlayerFile.dat");
-                CompoundTag currentTag = NBTIO.readFile(del + File.separator + "playerdata" + File.separator + playerUUID +".dat");
-                currentTag.put(backedTag.get(part));
-                NBTIO.writeFile(currentTag, del + File.separator + "playerdata" + File.separator + playerUUID +".dat");
-                FileUtils.forceDelete(new File(backupDir + File.separator + "TempPlayerFile.dat"));
-            }
-
-        }
-    }
-    public static void restoreWorld(String backup, String world) throws IOException, InterruptedException {
-        String[] worlds;
-        if(world.equalsIgnoreCase("all"))
-            worlds = new String[]{"world", "world_nether", "world_the_end"};
-        else
-            worlds = new String[]{world};
-
-        for(String worldName : worlds) {
-            String dest = new File(mainDir).getParent();
-            String folder = (new File(mainDir).getName() + "/" + worldName + "/");
-            String del = mainDir + File.separator + worldName;
-            List<String> filter = restorePlayerDataWithWorld ? new ArrayList<String>() : Arrays.asList("playerdata", "advancements");
-            unzip(backup, dest, folder, del, filter);
-        }
-    }
-    public static void restoreServer(String backup) throws IOException, InterruptedException {
-
-        String dest = new File(mainDir).getParent();
-        List<String> filter = new ArrayList<>();
-        unzip(backup, dest, null, null, filter);
-    }
-
-    public static void unzip(String file, String dest, @Nullable String folder, @Nullable String del, List<String> filter) throws IOException, InterruptedException {
-        File tempZip = new File(new File(file).getParent() + File.separator + "TEMP.zip");
-        FileUtils.copyFile(new File(file), tempZip);
-        FilenameFilter test = new FilenameFilter(){
-
-            @Override
-            public boolean accept(File dir, String name) {
-                return !filter.contains(name);
-            }
-        };
-        if(del!=null) {
-            for (File file1 : new File(del).listFiles(test)) {
-                FileUtils.forceDelete(file1);
-            }
-        }
-        ZipFile zipFile = new ZipFile(tempZip);
-
-        ProgressMonitor progressMonitor = zipFile.getProgressMonitor();
-        for(String excludedFolder : filter) {
-            System.out.println(folder + excludedFolder + "/");
-            zipFile.removeFile(folder + excludedFolder + "/");
-        }
-
-        zipFile.setRunInThread(true);
-        if(folder == null)
-            zipFile.extractAll(dest);
-        else
-            zipFile.extractFile(folder, dest);
-        while (!progressMonitor.getState().equals(ProgressMonitor.State.READY)) {
-
-            Thread.sleep(100);
-        }
-
-        if (progressMonitor.getResult().equals(ProgressMonitor.Result.SUCCESS)) {
-            System.out.println("Successfully added folder to zip");
-        } else if (progressMonitor.getResult().equals(ProgressMonitor.Result.ERROR)) {
-            System.out.println("Error occurred. Error message: " + progressMonitor.getException().getMessage());
-        } else if (progressMonitor.getResult().equals(ProgressMonitor.Result.CANCELLED)) {
-            System.out.println("Task cancelled");
-        }
-        FileUtils.forceDelete(tempZip);
-    }
-    public static void zip(String dest, String dir) throws ZipException, InterruptedException {
-        ZipFile zipFile = new ZipFile(dest + File.separator + "testZip.zip");
-//        ZipFile zipFile = new ZipFile(dest/*plugin.backups + plugin.backupNameFormat.replaceAll("%date%", plugin.dateFormat.format(d)) + ".zip"*/);
-
-        ProgressMonitor progressMonitor = zipFile.getProgressMonitor();
-
-        ExcludeFileFilter exclude = file -> excludedFolders.contains(file.getName()) || excludedExtensions.contains(FilenameUtils.getExtension(file.getName()));
-        ZipParameters zipParam = new ZipParameters();
-        zipParam.setExcludeFileFilter(exclude);
-        zipFile.setRunInThread(true);
-        zipFile.addFolder(new File(dir), zipParam);
-        while (!progressMonitor.getState().equals(ProgressMonitor.State.READY)) {
-            System.out.println("Percentage done: " + progressMonitor.getPercentDone());
-
-            Thread.sleep(100);
-        }
-
-        if (progressMonitor.getResult().equals(ProgressMonitor.Result.SUCCESS)) {
-            System.out.println("Successfully added folder to zip");
-        } else if (progressMonitor.getResult().equals(ProgressMonitor.Result.ERROR)) {
-            System.out.println("Error occurred. Error message: " + progressMonitor.getException().getMessage());
-        } else if (progressMonitor.getResult().equals(ProgressMonitor.Result.CANCELLED)) {
-            System.out.println("Task cancelled");
-        }
-    }
+//    public static void restorePlayer(String backup, String player, String part) throws IOException, InterruptedException {
+//        switch(part.toLowerCase()){
+//            case "inventory":
+//                part = "Inventory";
+//                break;
+//            case "enderchest":
+//                part = "EnderItems";
+//                break;
+//        }
+//        if(player.equalsIgnoreCase("all")){
+//            if(part.equalsIgnoreCase("all")) {
+//                String dest = new File(mainDir).getParent();
+//                String folder = (new File(mainDir).getName() + "/world/playerdata/");
+//                String del = mainDir + File.separator + "world" + File.separator + "playerdata";
+//                List<String> filter = new ArrayList<String>();
+//                unzip(backup, dest, folder, del, filter);
+//                folder = (new File(mainDir).getName() + "/world/advancements/");
+//                del = mainDir + File.separator + "world" + File.separator + "advancements";
+//                unzip(backup, dest, folder, del, filter);
+//            }
+//            else{
+//                ZipFile zip = new ZipFile(backup);
+//                zip.extractFile(new File(mainDir).getName() + "/world/playerdata/", backupDir, "TempPlayerFiles");
+//
+//                FilenameFilter fileNameFilter = (dir, name) -> name.endsWith(".dat");
+//
+//                File currentPlayerdata = new File(del + File.separator + "playerdata");
+//                String[] currentPlayers = Objects.requireNonNull(currentPlayerdata.list(fileNameFilter));
+//
+//                File backedPlayerdata = new File(backupDir + File.separator + "TempPlayerFiles");
+//                List<String> backedPlayers = Arrays.asList(Objects.requireNonNull(backedPlayerdata.list(fileNameFilter)));
+//
+//                for(String playerFile : currentPlayers){
+//                    String uuid = new File(playerFile).getName();
+//                    CompoundTag currentTag = NBTIO.readFile(del + File.separator + "playerdata" + File.separator + uuid);
+//                    currentTag.put(new ListTag(part));
+//
+//                    if(backedPlayers.contains(uuid)) {
+//
+//                        CompoundTag backedTag = NBTIO.readFile(backupDir + File.separator + "TempPlayerFiles" + File.separator + uuid);
+//                        currentTag.put(backedTag.get(part));
+//                        NBTIO.writeFile(currentTag, del + File.separator + "playerdata" + File.separator + uuid);
+//                    }
+//                }
+//                FileUtils.forceDelete(new File(backupDir + File.separator + "TempPlayerFiles"));
+//            }
+//        }
+//        else{
+//            if(part.equalsIgnoreCase("all")) {
+//                String dest = new File(mainDir).getParent();
+//                String folder = (new File(mainDir).getName() + "/world/playerdata/" + player + ".dat");
+//                List<String> filter = new ArrayList<String>();
+//                unzip(backup, dest, folder, null, filter);
+//                folder = (new File(mainDir).getName() + "/world/playerdata/" + player + ".dat_old");
+//                unzip(backup, dest, folder, null, filter);
+//                folder = (new File(mainDir).getName() + "/world/advancements/" + player + ".json");
+//                unzip(backup, dest, folder, null, filter);
+//            }
+//            else{
+//                ZipFile zip = new ZipFile(backup);
+//                zip.extractFile(new File(mainDir).getName() + "/world/playerdata/" + player + ".dat", backupDir, "TempPlayerFile.dat");
+//                CompoundTag backedTag = NBTIO.readFile(backupDir + File.separator + "TempPlayerFile.dat");
+//                CompoundTag currentTag = NBTIO.readFile(del + File.separator + "playerdata" + File.separator + playerUUID +".dat");
+//                currentTag.put(backedTag.get(part));
+//                NBTIO.writeFile(currentTag, del + File.separator + "playerdata" + File.separator + playerUUID +".dat");
+//                FileUtils.forceDelete(new File(backupDir + File.separator + "TempPlayerFile.dat"));
+//            }
+//
+//        }
+//    }
+//    public static void restoreWorld(String backup, String world) throws IOException, InterruptedException {
+//        String[] worlds;
+//        if(world.equalsIgnoreCase("all"))
+//            worlds = new String[]{"world", "world_nether", "world_the_end"};
+//        else
+//            worlds = new String[]{world};
+//
+//        for(String worldName : worlds) {
+//            String dest = new File(mainDir).getParent();
+//            String folder = (new File(mainDir).getName() + "/" + worldName + "/");
+//            String del = mainDir + File.separator + worldName;
+//            List<String> filter = restorePlayerDataWithWorld ? new ArrayList<String>() : Arrays.asList("playerdata", "advancements");
+//            unzip(backup, dest, folder, del, filter);
+//        }
+//    }
+//    public static void restoreServer(String backup) throws IOException, InterruptedException {
+//
+//        String dest = new File(mainDir).getParent();
+//        List<String> filter = new ArrayList<>();
+//        unzip(backup, dest, null, null, filter);
+//    }
+//
+//    public static void unzip(String file, String dest, @Nullable String folder, @Nullable String del, List<String> filter) throws IOException, InterruptedException {
+//        File tempZip = new File(new File(file).getParent() + File.separator + "TEMP.zip");
+//        FileUtils.copyFile(new File(file), tempZip);
+//        FilenameFilter test = new FilenameFilter(){
+//
+//            @Override
+//            public boolean accept(File dir, String name) {
+//                return !filter.contains(name);
+//            }
+//        };
+//        if(del!=null) {
+//            for (File file1 : new File(del).listFiles(test)) {
+//                FileUtils.forceDelete(file1);
+//            }
+//        }
+//        ZipFile zipFile = new ZipFile(tempZip);
+//
+//        ProgressMonitor progressMonitor = zipFile.getProgressMonitor();
+//        for(String excludedFolder : filter) {
+//            System.out.println(folder + excludedFolder + "/");
+//            zipFile.removeFile(folder + excludedFolder + "/");
+//        }
+//
+//        zipFile.setRunInThread(true);
+//        if(folder == null)
+//            zipFile.extractAll(dest);
+//        else
+//            zipFile.extractFile(folder, dest);
+//        while (!progressMonitor.getState().equals(ProgressMonitor.State.READY)) {
+//
+//            Thread.sleep(100);
+//        }
+//        FileUtils.forceDelete(tempZip);
+//    }
+//    public static void backup(String dest, String dir) throws ZipException, InterruptedException {
+//        ZipFile zipFile = new ZipFile(dest + File.separator + "testZip.zip");
+////        ZipFile zipFile = new ZipFile(dest/*plugin.backups + plugin.backupNameFormat.replaceAll("%date%", plugin.dateFormat.format(d)) + ".zip"*/);
+//
+//        ProgressMonitor progressMonitor = zipFile.getProgressMonitor();
+//
+//        ExcludeFileFilter exclude = file -> excludedFolders.contains(file.getName()) || excludedExtensions.contains(FilenameUtils.getExtension(file.getName()));
+//        ZipParameters zipParam = new ZipParameters();
+//        zipParam.setExcludeFileFilter(exclude);
+//        zipFile.setRunInThread(true);
+//        zipFile.addFolder(new File(dir), zipParam);
+//        while (!progressMonitor.getState().equals(ProgressMonitor.State.READY)) {
+//            System.out.println("Percentage done: " + progressMonitor.getPercentDone());
+//
+//            Thread.sleep(100);
+//        }
+//
+//        if (progressMonitor.getResult().equals(ProgressMonitor.Result.SUCCESS)) {
+//            System.out.println("Successfully added folder to zip");
+//        } else if (progressMonitor.getResult().equals(ProgressMonitor.Result.ERROR)) {
+//            System.out.println("Error occurred. Error message: " + progressMonitor.getException().getMessage());
+//        } else if (progressMonitor.getResult().equals(ProgressMonitor.Result.CANCELLED)) {
+//            System.out.println("Task cancelled");
+//        }
+//    }
 //    private static void unzip(String zipFilePath, String destDir, List<String> exlusions, String parentName) {
 //        File dir = new File(destDir);
 //        // create output directory if it doesn't exist

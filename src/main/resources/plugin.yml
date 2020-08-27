@@ -1,7 +1,7 @@
 name: TimeMachine
 author: Warunek
 main: com.github.warunek.timemachine.TimeMachine
-version: 1.0.1
+version: 1.1.0
 api-version: 1.13
 load: STARTUP
 description: An easy and simple server backup solution

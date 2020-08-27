@@ -36,7 +36,6 @@ public class TimeMachineCommand implements CommandExecutor {
                     "/tm restore world <world:all> <backup> : restores selected world files\n" +
                     "/tm restore player <player:all> <backup> : restores selected player's save file\n" + ChatColor.GRAY +
                     "/tm restore pluginconfig <plugin:all> <backup> : Restores plugin files of selected plugin" +
-                    "/tm restoreWorld <backup> <(optional)x:y>: Restores a world save or individual chunks to a previous backup" +
                     "/tm disableAutoSaver : Disables the autosaver");
             return true;
         }
@@ -137,21 +136,35 @@ public class TimeMachineCommand implements CommandExecutor {
 
             }
             else if(args[1].equalsIgnoreCase("chunk")){
+                if(args.length != 5) {
+                    sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Not a valid input");
+                    return true;
+                }
+                backupFile = new File(plugin.backups.getAbsolutePath() + File.separator + args[4]);
+                if(!backupFile.exists()){
+                    sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Backup not found");
+                    return true;
+                }
                 String world = args[2];
                 int[][] chunks;
                 String[] tempChunks = args[3].split("\\|");
                 chunks = new int[tempChunks.length][2];
-                for(int i = 0; i < tempChunks.length; i++){
-                    String[] temp = tempChunks[i].split(",");
-                    for(int j = 0; j < 2; j++){
-                        try{
+                try{
+                    for(int i = 0; i < tempChunks.length; i++){
+                        String[] temp = tempChunks[i].split(",");
+                        for(int j = 0; j < 2; j++){
+
                             chunks[i][j] = Integer.parseInt(temp[j]);
-                        }catch (NumberFormatException e){
-                            sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Restore failed. Stack trace printed in console");
-                            Bukkit.getServer().getConsoleSender().sendMessage(e.getMessage());
                         }
                     }
-                    sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " " + chunks[i][0] + "," + chunks[i][1]);
+                    Restore.chunk(plugin, backupFile, world, chunks);
+                    Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[SUCCESS]" + ChatColor.DARK_AQUA + " Restore Chunks: restored to " + backupFile.getName());
+                    Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Server restarting in 5 seconds...");
+                    plugin.restartServer();
+                }catch (Exception e){
+                    sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Not a valid chunk input. Must be in this format: x,z|x,z|x,z...");
+                    Bukkit.getServer().getConsoleSender().sendMessage(e.getMessage());
+                    return true;
                 }
 
 
