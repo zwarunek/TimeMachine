@@ -1,6 +1,6 @@
-package com.github.warunek.timemachine.util;
+package com.github.zwarunek.timemachine.util;
 
-import com.github.warunek.timemachine.TimeMachine;
+import com.github.zwarunek.timemachine.TimeMachine;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;

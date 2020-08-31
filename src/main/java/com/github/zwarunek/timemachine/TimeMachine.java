@@ -1,7 +1,7 @@
-package com.github.warunek.timemachine;
+package com.github.zwarunek.timemachine;
 
-import com.github.warunek.timemachine.util.TimeMachineCommand;
-import com.github.warunek.timemachine.util.TimeMachineTabCompleter;
+import com.github.zwarunek.timemachine.util.TimeMachineCommand;
+import com.github.zwarunek.timemachine.util.TimeMachineTabCompleter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -10,8 +10,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 public class TimeMachine extends JavaPlugin{
 

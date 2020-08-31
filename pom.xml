@@ -13,7 +13,7 @@
         <directory>C:\Users\zacha\Desktop\1.16.2 server\plugins</directory>
     </build>
 
-    <groupId>com.github.warunek</groupId>
+    <groupId>com.github.zwarunek</groupId>
     <artifactId>TimeMachine</artifactId>
     <version>1.1.2</version>
     <dependencies>
@@ -28,10 +28,10 @@
             <artifactId>commons-io</artifactId>
             <version>2.7</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>net.lingala.zip4j</groupId>-->
-<!--            <artifactId>zip4j</artifactId>-->
-<!--            <version>2.6.2</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>net.lingala.zip4j</groupId>
+            <artifactId>zip4j</artifactId>
+            <version>2.6.2</version>
+        </dependency>
     </dependencies>
 </project>
