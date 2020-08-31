@@ -1,4 +1,4 @@
-package com.github.warunek.timemachine.util;
+package com.github.zwarunek.timemachine.util;
 
 /*
  ** 2011 January 5
