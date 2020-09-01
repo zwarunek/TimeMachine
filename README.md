@@ -1,5 +1,5 @@
 # TimeMachine
-This is a world backup and restoreing plugin for Minecraft servers.\
+This is a world backup and restoreing plugin for Minecraft servers.
 
 ### Features
 

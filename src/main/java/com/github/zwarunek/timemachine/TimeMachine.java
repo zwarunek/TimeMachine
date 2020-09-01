@@ -58,9 +58,6 @@ public class TimeMachine extends JavaPlugin{
         if(!backups.exists())
             backups.mkdir();
     }
-    public File getMainDir(){
-        return mainDir;
-    }
 
     public void restartServer(){
 

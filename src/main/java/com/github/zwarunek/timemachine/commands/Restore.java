@@ -16,17 +16,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 
 public class Restore {
 
 
     public static void player(TimeMachine plugin, File backup, String player, String part) throws IOException, InterruptedException {
-        prepareServer(plugin, player, "Restoring your playersave to a previous backup");
         String backupDir = backup.getParent();
         switch(part.toLowerCase()){
             case "inventory":
@@ -37,6 +33,8 @@ public class Restore {
                 break;
         }
         if(player.equalsIgnoreCase("all")){
+            for (Player onlinePlayer : Bukkit.getOnlinePlayers())
+                onlinePlayer.kickPlayer(ChatColor.GREEN + "Restoring your playersave to a previous backup");
             if(part.equalsIgnoreCase("all")) {
                 String dest = plugin.mainDir.getParent();
                 String folder = (plugin.mainDir.getName() + "/world/playerdata/");
@@ -78,6 +76,9 @@ public class Restore {
             }
         }
         else{
+            Player playerObject = Bukkit.getPlayer(UUID.fromString(player));
+            assert playerObject != null;
+            playerObject.kickPlayer("Restoring your playersave to a previous backup");
             if(part.equalsIgnoreCase("all")) {
                 String dest = plugin.mainDir.getParent();
                 String folder = (plugin.mainDir.getName() + "/world/playerdata/" + player + ".dat");
@@ -100,9 +101,9 @@ public class Restore {
         }
     }
     public static void world(TimeMachine plugin, File backup, String worlds) throws IOException, InterruptedException {
-        //Kick all players
+
         try {
-            prepareServer(plugin, "all", "The server is restoring to a previous backup");
+            prepareServer(plugin);
         }catch (Exception e){
             System.out.println(e.getMessage());
         }
@@ -112,21 +113,20 @@ public class Restore {
             for(World world : Bukkit.getWorlds()){
                 worldNameList.add(world.getWorldFolder().getName());
             }
-
         else
-            worldNameList = Arrays.asList(worlds);
+            worldNameList = Collections.singletonList(worlds);
 
         for(String worldName : worldNameList) {
             String dest = plugin.mainDir.getParent();
             String folder = (plugin.mainDir.getName() + "/" + worldName + "/");
             String del = plugin.mainDir.getAbsolutePath() + File.separator + worldName;
-            List<String> filter = plugin.restorePlayerWithWorld ? new ArrayList<String>() : Arrays.asList("playerdata", "advancements");
+            List<String> filter = plugin.restorePlayerWithWorld ? new ArrayList<>() : Arrays.asList("playerdata", "advancements");
             unzip(backup.getAbsolutePath(), dest, folder, del, filter);
         }
     }
     public static void chunk(TimeMachine plugin, File backup, String world, int[][] chunks) throws IOException {
 
-        prepareServer(plugin, "all", "The server is restoring to a previous backup");
+        prepareServer(plugin);
         String backupDir = backup.getParent();
         for(int[] chunk : chunks) {
             String regionFileName = "r." + (chunk[0] >> 5) + "." + (chunk[1] >> 5) + ".mca";
@@ -164,7 +164,7 @@ public class Restore {
     }
     public static void server(TimeMachine plugin, File backup) throws IOException, InterruptedException {
         //Kick all players
-        prepareServer(plugin, "all", "The server is restoring to a previous backup");
+        prepareServer(plugin);
 
         String dest = plugin.mainDir.getParent();
         List<String> filter = new ArrayList<>();
@@ -204,109 +204,28 @@ public class Restore {
         }
         FileUtils.forceDelete(tempZip);
     }
-    private static void prepareServer(TimeMachine plugin, String playerName, String message){
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            boolean isSame = player.getDisplayName().equals(playerName);
-            if (isSame || playerName.equalsIgnoreCase("all")) {
-                player.kickPlayer(ChatColor.GREEN + message);
-            }
-        }
-        for (Plugin p : Bukkit.getPluginManager().getPlugins()) {
-            if (p != plugin) {
+    private static void prepareServer(TimeMachine plugin){
+        for (Player player : Bukkit.getOnlinePlayers())
+            player.kickPlayer(ChatColor.GREEN + "The server is restoring to a previous backup");
+
+        for (Plugin p : Bukkit.getPluginManager().getPlugins())
+            if (p != plugin)
                 try {
                     Bukkit.getPluginManager().disablePlugin(p);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            }
-        }
-        //Unload all worlds.
 
+        //Unload all worlds.
         for (World w : Bukkit.getWorlds()) {
             w.save();
             if (w.isAutoSave()) {
                 w.setAutoSave(false);
             }
             for (Chunk c : w.getLoadedChunks()) {
-
                 c.unload(false);
             }
             Bukkit.unloadWorld(w, true);
         }
     }
-//    public static void overrideFiles(TimeMachine plugin, File backup, String restoring, String world){
-//
-//        File parentTo = plugin.getMainDir().getParentFile();
-//        try {
-//            byte[] buffer = new byte[1024];
-//            ZipInputStream zis = new ZipInputStream(new FileInputStream(backup));
-//            ZipEntry zipEntry = zis.getNextEntry();
-//            while (zipEntry != null) {
-//                File newFile = newFile(parentTo, zipEntry);
-//                String [] folders = zipEntry.getName().split(Pattern.quote(File.separator));
-//                boolean restoreFile = false;
-//                boolean restorePlayerData;
-//
-//                try{
-//
-//                    switch(restoring.toLowerCase()){
-//                        case "server":
-//                            restoreFile = true;
-//                            break;
-//                        case "world":
-//                            boolean allWorlds = world.contentEquals("all");
-//                            restorePlayerData = plugin.getConfig().getBoolean("restorePlayerWithWorld");
-//                            restoreFile = (restorePlayerData || folders[2].equalsIgnoreCase("playerdata"))
-//                                    && !allWorlds ? folders[1].equalsIgnoreCase(world)
-//                                    : ((folders[1].equalsIgnoreCase("world")
-//                                    || (folders[1].equalsIgnoreCase("world_nether")
-//                                    || (folders[1].equalsIgnoreCase("world_the_end")))));
-//                            break;
-////                        case "player":
-////                            OfflinePlayer[] players = ;
-////                            for(OfflinePlayer player: Bukkit.getOfflinePlayers()){
-////                                player.
-////                            }
-////                            break;
-//                    }
-//                }catch (IndexOutOfBoundsException e){}
-//
-//                if(restoreFile) {
-//                    FileOutputStream fos = new FileOutputStream(newFile);
-//                    try {
-//                        int len;
-//                        while ((len = zis.read(buffer)) > 0) {
-//                            fos.write(buffer, 0, len);
-//                        }
-//                        fos.close();
-//
-//                        zipEntry = zis.getNextEntry();
-//                    } catch (EOFException e) {
-//                        zipEntry = null;
-//                        fos.close();
-//                    }
-//                }else{
-//                    zipEntry = zis.getNextEntry();
-//                }
-//            }
-//            zis.closeEntry();
-//            zis.close();
-//        } catch (Exception e4) {
-//            e4.printStackTrace();
-//        }
-//    }
-//
-//    public static File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
-//        File destFile = new File(destinationDir, zipEntry.getName());
-//
-//        String destDirPath = destinationDir.getCanonicalPath();
-//        String destFilePath = destFile.getCanonicalPath();
-//
-//        if (!destFilePath.startsWith(destDirPath + File.separator)) {
-//            throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
-//        }
-//
-//        return destFile;
-//    }
-
 }

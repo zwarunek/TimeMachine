@@ -67,10 +67,7 @@ public class TimeMachineCommand implements CommandExecutor {
             }
         }
         if (args[0].equalsIgnoreCase("restore")){
-//            if(args.length != 2){
-//                sender.sendMessage(ChatColor.DARK_AQUA + "Please give the name of the backup that you want to be restored");
-//                return true;
-//            }
+
             if(args[1].equalsIgnoreCase("server")){
                 backupFile = new File(plugin.backups.getAbsolutePath() + File.separator + args[2]);
                 if(backupFile.exists()){
