@@ -1,5 +1,7 @@
 package com.github.zwarunek.timemachine;
 
+import com.github.zwarunek.timemachine.items.ChunkWand;
+import com.github.zwarunek.timemachine.util.ItemListener;
 import com.github.zwarunek.timemachine.util.TimeMachineCommand;
 import com.github.zwarunek.timemachine.util.TimeMachineTabCompleter;
 import org.bukkit.Bukkit;
@@ -27,6 +29,7 @@ public class TimeMachine extends JavaPlugin{
     public boolean isRestoring = false;
     public boolean isBackingUp = false;
     public boolean restorePlayerWithWorld;
+    public ChunkWand chunkWand;
     public List<String> backupFolderExceptions;
     public List<String> backupExtensionExceptions;
     public BukkitRunnable autobackupRunnable;
@@ -51,12 +54,22 @@ public class TimeMachine extends JavaPlugin{
         backupExtensionExceptions = (List<String>)getConfig().getList("backupExtensionExceptions");
         backupFolderExceptions = (List<String>)getConfig().getList("backupFolderExceptions");
 
+        chunkWand = new ChunkWand();
         final TimeMachineCommand command = new TimeMachineCommand(this);
         final TimeMachineTabCompleter tabCompleter = new TimeMachineTabCompleter(this);
+        ItemListener itemListener = new ItemListener(this);
+        getServer().getPluginManager().registerEvents(itemListener, this);
         getCommand("timemachine").setExecutor(command);
         getCommand("timemachine").setTabCompleter(tabCompleter);
         if(!backups.exists())
             backups.mkdir();
+    }
+
+    @Override
+    public void onDisable() {
+        if(chunkWand.isInUse){
+            chunkWand.player.getInventory().remove(chunkWand.chunkWand);
+        }
     }
 
     public void restartServer(){

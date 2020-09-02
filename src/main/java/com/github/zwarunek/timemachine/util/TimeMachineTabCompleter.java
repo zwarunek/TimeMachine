@@ -59,7 +59,6 @@ public class TimeMachineTabCompleter implements TabCompleter {
                         case "world":
                             list.add("all");
                         case "chunk":
-                            System.out.println(Bukkit.getWorlds().size());
                             for(World world : Bukkit.getWorlds()){
                                 commands.add(world.getName());
                             }
@@ -82,6 +81,7 @@ public class TimeMachineTabCompleter implements TabCompleter {
                 }
                 break;
             case 4:
+
                 if (args[0].equalsIgnoreCase("restore")) {
                     if (args[1].equalsIgnoreCase("world") && args[2] != null) {
                         getBackupFiles(list, args[3]);

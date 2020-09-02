@@ -21,6 +21,8 @@ import java.util.*;
 
 public class Restore {
 
+    public static List<Chunk> selectedChunks = new ArrayList<>();
+
 
     public static void player(TimeMachine plugin, File backup, String player, String part) throws IOException, InterruptedException {
         String backupDir = backup.getParent();
@@ -124,15 +126,19 @@ public class Restore {
             unzip(backup.getAbsolutePath(), dest, folder, del, filter);
         }
     }
-    public static void chunk(TimeMachine plugin, File backup, String world, int[][] chunks) throws IOException {
+    public static void chunk(TimeMachine plugin, File backup, String world, @Nullable List<Chunk> chunkInputs) throws IOException {
+        List<Chunk> chunks = chunkInputs;
+        if(chunks == null){
+            chunks = selectedChunks;
+        }
 
         prepareServer(plugin);
         String backupDir = backup.getParent();
-        for(int[] chunk : chunks) {
-            String regionFileName = "r." + (chunk[0] >> 5) + "." + (chunk[1] >> 5) + ".mca";
+        for(Chunk chunk : chunks) {
+            String regionFileName = "r." + (chunk.getX() >> 5) + "." + (chunk.getZ() >> 5) + ".mca";
             File currentFile;
-            int x = chunk[0] % (32);
-            int y = chunk[1] % (32);
+            int x = chunk.getX() % (32);
+            int y = chunk.getZ() % (32);
 
             currentFile = new File(plugin.mainDir.getAbsolutePath() + File.separator + world + File.separator + "region" + File.separator + regionFileName);
             if(!currentFile.exists()){
@@ -227,5 +233,8 @@ public class Restore {
             }
             Bukkit.unloadWorld(w, true);
         }
+    }
+    public static void setSelectedChunks(List<Chunk> chunks){
+        selectedChunks = chunks;
     }
 }

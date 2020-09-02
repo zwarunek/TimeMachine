@@ -3,16 +3,22 @@ package com.github.zwarunek.timemachine.util;
 import com.github.zwarunek.timemachine.TimeMachine;
 import com.github.zwarunek.timemachine.commands.Backup;
 import com.github.zwarunek.timemachine.commands.Restore;
+import com.github.zwarunek.timemachine.items.ChunkWand;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class TimeMachineCommand implements CommandExecutor {
 
@@ -24,9 +30,9 @@ public class TimeMachineCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         File backupFile;
+        String world;
         if(!sender.hasPermission("timemachine")){
             sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " You do no have permission to use this command");
-
             return true;
         }
         if(args.length == 0){
@@ -35,7 +41,10 @@ public class TimeMachineCommand implements CommandExecutor {
                     "/tm restore server <backup> : restores all server files\n" +
                     "/tm restore world <world:all> <backup> : restores selected world files\n" +
                     "/tm restore player <player:all> <backup> : restores selected player's save file\n" +
-                    "/tm restore chunk <world> <x,z|x,z|...> <backup> : Restores chunks to backup\n" + ChatColor.GRAY +
+                    "/tm restore chunk <world> <x,z|x,z|...:selected> <backup> : Restores chunks to backup\n" +
+                    "/tm wand : Gives player the chunk selector wand\n" +
+                    "/tm saveselectedchunks : Saves selected wand chunks\n" +
+                    "/tm discardsavedchunks : Deselect all wand chunks\n" + ChatColor.GRAY +
                     "/tm autosave <enable:disable> <nM,H,D> : Enables or disables the autosave feature **Not supported yet");
             return true;
         }
@@ -67,130 +76,164 @@ public class TimeMachineCommand implements CommandExecutor {
             }
         }
         if (args[0].equalsIgnoreCase("restore")){
-
-            if(args[1].equalsIgnoreCase("server")){
-                backupFile = new File(plugin.backups.getAbsolutePath() + File.separator + args[2]);
-                if(backupFile.exists()){
-                    try {
-                        sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Server is restoring to " + backupFile.getName());
-                        Restore.server(plugin, backupFile);
-                        Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[SUCCESS]" + ChatColor.DARK_AQUA + " Server was restored to " + backupFile.getName());
-                        Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Server restarting in 5 seconds...");
-                        plugin.restartServer();
-                    }catch(Exception e){
-                        sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Restore failed. stack trace printed in console");
-                        Bukkit.getServer().getConsoleSender().sendMessage(e.getMessage());
+            switch(args[1].toLowerCase()){
+                case "server":
+                    backupFile = new File(plugin.backups.getAbsolutePath() + File.separator + args[2]);
+                    if(backupFile.exists()){
+                        try {
+                            sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Server is restoring to " + backupFile.getName());
+                            Restore.server(plugin, backupFile);
+                            Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[SUCCESS]" + ChatColor.DARK_AQUA + " Server was restored to " + backupFile.getName());
+                            Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Server restarting in 5 seconds...");
+                            plugin.restartServer();
+                        }catch(Exception e){
+                            sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Restore failed. stack trace printed in console");
+                            Bukkit.getServer().getConsoleSender().sendMessage(e.getMessage());
+                        }
                     }
-                }
-                else {
-                    sender.sendMessage(ChatColor.RED + "[ERROR]" + ChatColor.DARK_AQUA + " cannot find file: " + backupFile.getName());
-                }
-            }
-            else if(args[1].equalsIgnoreCase("world")){
-                String world = args[2];
-                if(Bukkit.getWorld(world) == null){
-                    sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " World not found");
-                    return true;
-                }
-                backupFile = new File(plugin.backups.getAbsolutePath() + File.separator + args[3]);
-                if(backupFile.exists()){
+                    else {
+                        sender.sendMessage(ChatColor.RED + "[ERROR]" + ChatColor.DARK_AQUA + " cannot find file: " + backupFile.getName());
+                    }
+                    break;
+                case "world":
+                    if(verifyWorld(sender, world = args[2])) return true;
+                    backupFile = new File(plugin.backups.getAbsolutePath() + File.separator + args[3]);
+                    if(backupFile.exists()){
+                        try{
+                            sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Restore World: restoring " + world + " to " + backupFile.getName());
+                            Restore.world(plugin, backupFile, world);
+                            Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[SUCCESS]" + ChatColor.DARK_AQUA + " Restore World: restored " + world + " to " + backupFile.getName());
+                            Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Server restarting in 5 seconds...");
+                            plugin.restartServer();
+                        }catch (Exception e){
+                            sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Restore failed. Stack trace printed in console");
+                            Bukkit.getServer().getConsoleSender().sendMessage(e.getMessage());
+                        }
+                    }
+                    break;
+                case "player":
+                    String player = args[2];
+                    String playerUUID = "";
+                    String part = args[3];
+                    backupFile = new File(plugin.backups.getAbsolutePath() + File.separator + args[4]);
+                    boolean playerExists = false;
+                    for(OfflinePlayer p : Bukkit.getOfflinePlayers())
+                        if(p.getName() != null && p.getName().equalsIgnoreCase(player)){
+                            playerExists = true;
+                            playerUUID = p.getUniqueId().toString();
+                        }
+
+                    if(!playerExists){
+                        sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Player not found");
+                        return true;
+                    }
+                    if(backupFile.exists()){
+                        try{
+                            sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Restore Player: restoring " + player + " to " + backupFile.getName());
+                            Restore.player(plugin, backupFile, playerUUID, part);
+                            Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[SUCCESS]" + ChatColor.DARK_AQUA + " Restore Player: restored " + player + " to " + backupFile.getName());
+                        }catch (Exception e){
+                            sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Restore failed. Stack trace printed in console");
+                            Bukkit.getServer().getConsoleSender().sendMessage(e.getMessage());
+                            return true;
+                        }
+                    }
+
+                    break;
+                case "chunk":
+                    if(args.length != 5) {
+                        sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Not a valid input");
+                        return true;
+                    }
+                    backupFile = new File(plugin.backups.getAbsolutePath() + File.separator + args[4]);
+                    if(!backupFile.exists()){
+                        sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Backup not found");
+                        return true;
+                    }
+                    List<Chunk> chunks;
+                    if(verifyWorld(sender, world = args[2])) return true;
                     try{
-                        sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Restore World: restoring " + world + " to " + backupFile.getName());
-                        Restore.world(plugin, backupFile, world);
-                        Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[SUCCESS]" + ChatColor.DARK_AQUA + " Restore World: restored " + world + " to " + backupFile.getName());
+                        if(args[3].equalsIgnoreCase("selected")){
+                            chunks = null;
+                        }
+                        else {
+                            String[] tempChunks = args[3].split("\\|");
+                            chunks = new ArrayList<>(tempChunks.length);
+                            for (int i = 0; i < tempChunks.length; i++) {
+                                for (int j = 0; j < 2; j++) {
+                                    chunks.add(Bukkit.getWorld(world).getChunkAt(i, j));
+                                }
+                            }
+                        }
+                        Restore.chunk(plugin, backupFile, world, chunks);
+                        Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[SUCCESS]" + ChatColor.DARK_AQUA + " Restore Chunks: restored to " + backupFile.getName());
                         Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Server restarting in 5 seconds...");
                         plugin.restartServer();
                     }catch (Exception e){
-                        sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Restore failed. Stack trace printed in console");
-                        Bukkit.getServer().getConsoleSender().sendMessage(e.getMessage());
-                    }
-                }
-
-            }
-            else if(args[1].equalsIgnoreCase("player")){
-                String player = args[2];
-                String playerUUID = "";
-                String part = args[3];
-                backupFile = new File(plugin.backups.getAbsolutePath() + File.separator + args[4]);
-                boolean playerExists = false;
-                for(OfflinePlayer p : Bukkit.getOfflinePlayers())
-                    if(p.getName() != null && p.getName().equalsIgnoreCase(player)){
-                        playerExists = true;
-                        playerUUID = p.getUniqueId().toString();
-                    }
-
-                if(!playerExists){
-                    sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Player not found");
-                    return true;
-                }
-                if(backupFile.exists()){
-                    try{
-                        sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Restore Player: restoring " + player + " to " + backupFile.getName());
-                        Restore.player(plugin, backupFile, playerUUID, part);
-                        Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[SUCCESS]" + ChatColor.DARK_AQUA + " Restore Player: restored " + player + " to " + backupFile.getName());
-                    }catch (Exception e){
-                        sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Restore failed. Stack trace printed in console");
+                        sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Not a valid chunk input. Must be in this format: x,z|x,z|x,z...");
                         Bukkit.getServer().getConsoleSender().sendMessage(e.getMessage());
                         return true;
                     }
-                }
-
+                    break;
             }
-            else if(args[1].equalsIgnoreCase("chunk")){
-                if(args.length != 5) {
-                    sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Not a valid input");
+        }
+        else if(args[0].equalsIgnoreCase("wand")){
+            if(args.length == 1){
+                if(!(sender instanceof Player)){
+                    sender.sendMessage("Only players can access that command");
                     return true;
                 }
-                backupFile = new File(plugin.backups.getAbsolutePath() + File.separator + args[4]);
-                if(!backupFile.exists()){
-                    sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Backup not found");
+                if(plugin.chunkWand.isInUse){
+                    sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Chunk wand is already in use");
                     return true;
                 }
-                String world = args[2];
-                if(Bukkit.getWorld(world) == null){
-                    sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " World not found");
+                if(((Player) sender).getInventory().firstEmpty() == -1){
+                    sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Please make space in inventory");
                     return true;
                 }
-                int[][] chunks;
-                String[] tempChunks = args[3].split("\\|");
-                chunks = new int[tempChunks.length][2];
-                try{
-                    for(int i = 0; i < tempChunks.length; i++){
-                        String[] temp = tempChunks[i].split(",");
-                        for(int j = 0; j < 2; j++){
+                ((Player) sender).getInventory().addItem(plugin.chunkWand.getChunkWand(((Player) sender)));
+                sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Chunk wand given");
+                return true;
+            }
+            else if(args[1].equalsIgnoreCase("cancel")){
+                for(ItemStack stack : ((Player)sender).getInventory().getContents()){
 
-                            chunks[i][j] = Integer.parseInt(temp[j]);
-                        }
+                    if(stack != null && stack.hasItemMeta() && stack.getItemMeta().hasLore() && stack.getItemMeta().getLore().equals(ChunkWand.getLore())) {
+                        sender.sendMessage(stack.getType().name());
+                        ((Player) sender).getInventory().remove(stack);
+                        plugin.chunkWand.isInUse = false;
+                        plugin.chunkWand.player = null;
+                        sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Chunk wand has been taken");
+                        return true;
                     }
-                    Restore.chunk(plugin, backupFile, world, chunks);
-                    Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[SUCCESS]" + ChatColor.DARK_AQUA + " Restore Chunks: restored to " + backupFile.getName());
-                    Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Server restarting in 5 seconds...");
-                    plugin.restartServer();
-                }catch (Exception e){
-                    sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Not a valid chunk input. Must be in this format: x,z|x,z|x,z...");
-                    Bukkit.getServer().getConsoleSender().sendMessage(e.getMessage());
+                }
+                return true;
+            }
+        }
+        else if(args[0].equalsIgnoreCase("saveselectedchunks")){
+            for(ItemStack stack : ((Player)sender).getInventory().getContents()){
+                if(stack != null && stack.hasItemMeta() && stack.getItemMeta().hasLore() && stack.getItemMeta().getLore().equals(ChunkWand.getLore())) {
+                    sender.sendMessage(plugin.chunkWand.getSelectedChunks().toString());
+                    Restore.setSelectedChunks(plugin.chunkWand.getSelectedChunks());
+                    sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Saved selected shunks");
                     return true;
                 }
-
-
-//                backupFile = new File(plugin.backups.getAbsolutePath() + File.separator + args[4]);
-//                if(backupFile.exists()){
-//                    try{
-//                        sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Restore Chunk: restoring chunks in " + world + " to " + backupFile.getName());
-//                        Restore.chunk(plugin, backupFile, world, );
-//                        sender.sendMessage(ChatColor.GREEN + "[SUCCESS]" + ChatColor.DARK_AQUA + " Restore Chunk: restored chunks in " + world + " to " + backupFile.getName());
-//                        sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Server restarting in 5 seconds...");
-//                        plugin.restartServer();
-//                    }catch (Exception e){
-//                        sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Restore failed. Stack trace printed in console");
-//                        Bukkit.getServer().getConsoleSender().sendMessage(e.getMessage());
-//                    }
-//                }
-
             }
+            sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Not saved, you dont have a chunk wand");
+            return true;
+        }
+        else if(args[0].equalsIgnoreCase("discardsavedchunks")){
+            Restore.selectedChunks = new ArrayList<>();
             return true;
         }
         sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Unknown command. /tm for available commands");
+        return true;
+    }
+    private boolean verifyWorld(CommandSender sender, String world){
+        if(Bukkit.getWorld(world) == null){
+            sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " World not found");
+            return false;
+        }
         return true;
     }
 }
