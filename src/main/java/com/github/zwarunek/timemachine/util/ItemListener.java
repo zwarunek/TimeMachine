@@ -4,6 +4,7 @@ import com.github.zwarunek.timemachine.TimeMachine;
 import com.github.zwarunek.timemachine.items.ChunkWand;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -32,13 +33,14 @@ public class ItemListener implements Listener {
             if(event.getItem() != null && event.getItem().getItemMeta().getLore().equals(ChunkWand.getLore())){
 
                 if(player.rayTraceBlocks(200) != null ) {
-                    Chunk chunk = player.rayTraceBlocks(200).getHitBlock().getChunk();
+                    Block block = player.rayTraceBlocks(200).getHitBlock();
+                    Chunk chunk = block.getChunk();
                     if(event.getAction().name().startsWith("LEFT_CLICK")){
-                        if(plugin.chunkWand.addChunk(chunk))
+                        if(plugin.chunkWand.addChunk(block))
                             player.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Selected Chunk x: " + chunk.getX() + " z: " + chunk.getZ());
                     }
                     else if(event.getAction().name().startsWith("RIGHT_CLICK")){
-                        if(plugin.chunkWand.removeChunk(chunk))
+                        if(plugin.chunkWand.removeChunk(block))
                             player.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Removed Chunk x: " + chunk.getX() + " z: " + chunk.getZ());
                     }
                 }

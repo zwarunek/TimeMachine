@@ -215,7 +215,7 @@ public class TimeMachineCommand implements CommandExecutor {
                 if(stack != null && stack.hasItemMeta() && stack.getItemMeta().hasLore() && stack.getItemMeta().getLore().equals(ChunkWand.getLore())) {
                     sender.sendMessage(plugin.chunkWand.getSelectedChunks().toString());
                     Restore.setSelectedChunks(plugin.chunkWand.getSelectedChunks());
-                    sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Saved selected shunks");
+                    sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Saved selected chunks");
                     return true;
                 }
             }
@@ -224,6 +224,8 @@ public class TimeMachineCommand implements CommandExecutor {
         }
         else if(args[0].equalsIgnoreCase("discardsavedchunks")){
             Restore.selectedChunks = new ArrayList<>();
+            sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Selected chunks were discarded");
+
             return true;
         }
         sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Unknown command. /tm for available commands");
