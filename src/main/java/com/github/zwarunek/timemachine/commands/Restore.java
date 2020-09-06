@@ -6,7 +6,6 @@ import com.github.steveice10.opennbt.tag.builtin.ListTag;
 import com.github.steveice10.opennbt.tag.builtin.Tag;
 import com.github.zwarunek.timemachine.TimeMachine;
 import com.github.zwarunek.timemachine.util.RegionFile;
-import com.sun.istack.internal.Nullable;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.progress.ProgressMonitor;
@@ -126,7 +125,7 @@ public class Restore {
             unzip(backup.getAbsolutePath(), dest, folder, del, filter);
         }
     }
-    public static void chunk(TimeMachine plugin, File backup, String world, @Nullable List<Chunk> chunkInputs) throws IOException {
+    public static void chunk(TimeMachine plugin, File backup, String world, List<Chunk> chunkInputs) throws IOException {
         List<Chunk> chunks = chunkInputs;
         if(chunks == null){
             chunks = selectedChunks;
@@ -176,7 +175,7 @@ public class Restore {
         List<String> filter = new ArrayList<>();
         unzip(backup.getAbsolutePath(), dest, null, null, filter);
     }
-    public static void unzip(String file, String dest, @Nullable String folder, @Nullable String del, List<String> filter) throws IOException, InterruptedException {
+    public static void unzip(String file, String dest, String folder, String del, List<String> filter) throws IOException, InterruptedException {
         File tempZip = new File(new File(file).getParent() + File.separator + "TEMP.zip");
         FileUtils.copyFile(new File(file), tempZip);
         FilenameFilter test = new FilenameFilter(){
