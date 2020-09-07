@@ -71,7 +71,7 @@ public class UpdateChecker {
             @EventHandler(priority = EventPriority.MONITOR)
             public void onPlayerJoin(final PlayerJoinEvent event) {
                 final Player player = event.getPlayer();
-//                            if (!player.hasPermission(UPDATE_PERM)) return;
+                if (!player.hasPermission(UPDATE_PERM)) return;
                 player.sendMessage(ChatColor.AQUA + "[Time Machine] " + ChatColor.RED + "This is an outdated version. Version " + spigotPluginVersion + " is out at: " + ChatColor.RESET + "https://www.spigotmc.org/resources/" + ID + "/updates");
             }
         }, javaPlugin));
