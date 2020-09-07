@@ -16,6 +16,7 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.RayTraceResult;
 
 
 public class ItemListener implements Listener {
@@ -31,17 +32,17 @@ public class ItemListener implements Listener {
         Player player = event.getPlayer();
         try{
             if(event.getItem() != null && event.getItem().getItemMeta().getLore().equals(ChunkWand.getLore())){
+                RayTraceResult rayTrace = player.rayTraceBlocks(200);
+                if(rayTrace != null ) {
+                    Block block = rayTrace.getHitBlock();
 
-                if(player.rayTraceBlocks(200) != null ) {
-                    Block block = player.rayTraceBlocks(200).getHitBlock();
-                    Chunk chunk = block.getChunk();
                     if(event.getAction().name().startsWith("LEFT_CLICK")){
-                        if(plugin.chunkWand.addChunk(block))
-                            player.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Selected Chunk x: " + chunk.getX() + " z: " + chunk.getZ());
+                        plugin.chunkWand.player = player;
+                        plugin.chunkWand.addChunk(block);
                     }
                     else if(event.getAction().name().startsWith("RIGHT_CLICK")){
-                        if(plugin.chunkWand.removeChunk(block))
-                            player.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Removed Chunk x: " + chunk.getX() + " z: " + chunk.getZ());
+                        plugin.chunkWand.player = player;
+                        plugin.chunkWand.removeChunk(block);
                     }
                 }
             }

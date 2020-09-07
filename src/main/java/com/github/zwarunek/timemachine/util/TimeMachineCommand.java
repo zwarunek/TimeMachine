@@ -151,11 +151,16 @@ public class TimeMachineCommand implements CommandExecutor {
                         return true;
                     }
                     List<Chunk> chunks;
-                    if(verifyWorld(sender, world = args[2])) return true;
+                    if(!verifyWorld(sender, world = args[2])) return true;
                     try{
                         if(args[3].equalsIgnoreCase("selected")){
+                            if(Restore.selectedChunks.isEmpty()){
+                                Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " There are no selected chunks");
+                                return true;
+                            }
                             chunks = null;
                         }
+
                         else {
                             String[] tempChunks = args[3].split("\\|");
                             chunks = new ArrayList<>(tempChunks.length);
@@ -213,8 +218,11 @@ public class TimeMachineCommand implements CommandExecutor {
         else if(args[0].equalsIgnoreCase("saveselectedchunks")){
             for(ItemStack stack : ((Player)sender).getInventory().getContents()){
                 if(stack != null && stack.hasItemMeta() && stack.getItemMeta().hasLore() && stack.getItemMeta().getLore().equals(ChunkWand.getLore())) {
-                    sender.sendMessage(plugin.chunkWand.getSelectedChunks().toString());
-                    Restore.setSelectedChunks(plugin.chunkWand.getSelectedChunks());
+                    List<Chunk> chunks = new ArrayList<>();
+                    for(TMChunk tmChunk : plugin.chunkWand.getSelectedChunks()){
+                        chunks.add(tmChunk.getChunk());
+                    }
+                    Restore.setSelectedChunks(chunks);
                     sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Saved selected chunks");
                     return true;
                 }
