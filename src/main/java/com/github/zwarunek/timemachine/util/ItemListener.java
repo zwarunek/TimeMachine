@@ -75,7 +75,7 @@ public class ItemListener implements Listener {
             // The cursor item is going into the top inventory
             ItemStack onCursor = event.getCursor();
 
-            if (onCursor != null && event.getCurrentItem().getItemMeta().getDisplayName() != null && event.getCurrentItem().isSimilar(plugin.chunkWand.chunkWand)) {
+            if (onCursor != null && event.getCurrentItem()!=null && event.getCurrentItem().getItemMeta().getDisplayName() != null && event.getCurrentItem().isSimilar(plugin.chunkWand.chunkWand)) {
                 event.setCancelled( true );
             }
         }

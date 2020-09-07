@@ -4,12 +4,15 @@ import com.github.zwarunek.timemachine.items.ChunkWand;
 import com.github.zwarunek.timemachine.util.ItemListener;
 import com.github.zwarunek.timemachine.util.TimeMachineCommand;
 import com.github.zwarunek.timemachine.util.TimeMachineTabCompleter;
+import com.github.zwarunek.timemachine.util.UpdateChecker;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -40,6 +43,7 @@ public class TimeMachine extends JavaPlugin{
     @Override
     public void onEnable() {
         displayBanner();
+        new UpdateChecker(this).checkForUpdate();
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();
         mainDir = getDataFolder().getAbsoluteFile().getParentFile().getParentFile();
@@ -71,7 +75,6 @@ public class TimeMachine extends JavaPlugin{
             chunkWand.player.getInventory().remove(chunkWand.chunkWand);
         }
     }
-
     public void restartServer(){
 
         new BukkitRunnable(){
@@ -91,6 +94,7 @@ public class TimeMachine extends JavaPlugin{
         Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_AQUA + "/_/ /_/_/_/_/\\__/ /_/  /_/\\_,_/\\__/_//_/_/_//_/\\__/ ");
         Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_GRAY +      "        Version " + ChatColor.GOLD + version);
         Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_GRAY +      "        Author  " + ChatColor.WHITE + author.get(0));
+        Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_GRAY +      "*************************************************************" + ChatColor.WHITE + author.get(0));
 
     }
 
