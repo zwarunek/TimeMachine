@@ -18,8 +18,6 @@ import java.util.*;
 
 public class TimeMachine extends JavaPlugin{
 
-    public boolean savePluginJars;
-    public boolean saveServerJar;
     public int autoBackupFrequency;
     public File backups;
     public File mainDir;
@@ -28,14 +26,12 @@ public class TimeMachine extends JavaPlugin{
     public String backupPath;
     public String backupNameFormat;
     public SimpleDateFormat dateFormat;
-    public boolean saveConfig = false;
-    public boolean isRestoring = false;
     public boolean isBackingUp = false;
     public boolean restorePlayerWithWorld;
+    public boolean autosaveEnabled;
     public ChunkWand chunkWand;
     public List<String> backupFolderExceptions;
     public List<String> backupExtensionExceptions;
-    public BukkitRunnable autobackupRunnable;
     public final String version = this.getDescription().getVersion();
     public final List<String> author = this.getDescription().getAuthors();
 
@@ -51,6 +47,7 @@ public class TimeMachine extends JavaPlugin{
         pluginDir = new File(mainDir.getAbsolutePath() + File.separator + "plugins");
         backupPath =  getConfig().getString("backupFolderDirectory", "");
         backups = new File(mainDir + backupPath + File.separator + "backups" + File.separator);
+        autosaveEnabled = getConfig().getBoolean("autoBackups");
         autoBackupFrequency = getConfig().getInt("autoBackupFrequency");
         backupNameFormat =getConfig().getString("backupNameFormat");
         dateFormat = new SimpleDateFormat(getConfig().getString("dateFormat"));
