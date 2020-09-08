@@ -49,9 +49,10 @@ public class TimeMachineCommand implements CommandExecutor {
                     "/tm restore player <player:all> <backup> : restores selected player's save file\n" +
                     "/tm restore chunk <world> <x,z|x,z|...:selected> <backup> : Restores chunks to backup\n" +
                     "/tm wand : Gives player the chunk selector wand\n" +
+                    "/tm wand cancel : Removes wand and currently selected chunks\n" +
                     "/tm saveselectedchunks : Saves selected wand chunks\n" +
-                    "/tm discardsavedchunks : Deselect all wand chunks\n" + ChatColor.GRAY +
-                    "/tm autosave <enable:disable> <nM,H,D> : Enables or disables the autosave feature **Not supported yet");
+                    "/tm discardsavedchunks : Deselect all wand chunks\n" +
+                    "/tm deletebackup <backup> : Deletes the selected backup");
             return true;
         }
         if(args[0].equalsIgnoreCase("backup")){
