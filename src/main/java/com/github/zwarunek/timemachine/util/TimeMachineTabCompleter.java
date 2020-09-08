@@ -33,7 +33,7 @@ public class TimeMachineTabCompleter implements TabCompleter {
 
         switch (args.length) {
             case 1:
-                commands = Arrays.asList("backup", "restore", "deletebackup", "wand", "saveselectedchunks", "discardsavedchunks", "autosave");
+                commands = Arrays.asList("backup", "restore", "deletebackup", "wand", "saveselectedchunks", "discardsavedchunks");
                 for (String f : commands)
                     if (f.toLowerCase().startsWith(args[0].toLowerCase()))
                         list.add(f);
@@ -48,20 +48,13 @@ public class TimeMachineTabCompleter implements TabCompleter {
                 } else if (args[0].equalsIgnoreCase("deletebackup")
                         && plugin.backups.listFiles() != null) {
                     return getBackupFiles(list, args[1]);
-                } else if(args[0].equalsIgnoreCase("autosave")){
-                    commands = Arrays.asList("enable", "disable");
-                    for (String f : commands) {
-                        if (f.toLowerCase().startsWith(args[1].toLowerCase()) && ((f.equals("enable") && !plugin.autosaveEnabled) || (f.equals("disable") && plugin.autosaveEnabled)))
-                            list.add(f);
-                    }
-                    return list;
                 }
                 break;
             case 3:
                 if (args[0].equalsIgnoreCase("restore")) {
                     switch (args[1].toLowerCase()) {
                         case "server":
-                            list = getBackupFiles(list, args[2]);
+                            getBackupFiles(list, args[2]);
                             break;
                         case "world":
                             list.add("all");
@@ -84,11 +77,6 @@ public class TimeMachineTabCompleter implements TabCompleter {
                                     list.add(player.getName());
                             break;
                     }
-                    return list;
-                }
-                else if (args[0].equalsIgnoreCase("autosave") && !plugin.autosaveEnabled && args[1].equalsIgnoreCase("enable")){
-                    if((plugin.autoBackupFrequency + "").startsWith(args[2].toLowerCase()))
-                        list.add((plugin.autoBackupFrequency + ""));
                     return list;
                 }
                 break;

@@ -4,6 +4,8 @@ import com.github.zwarunek.timemachine.TimeMachine;
 import com.github.zwarunek.timemachine.commands.Backup;
 import com.github.zwarunek.timemachine.commands.Restore;
 import com.github.zwarunek.timemachine.items.ChunkWand;
+import com.tchristofferson.configupdater.ConfigUpdater;
+import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -11,12 +13,16 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -55,7 +61,6 @@ public class TimeMachineCommand implements CommandExecutor {
             }
             try {
                 sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + "Backup Started at " + plugin.dateFormat.format(new Date()));
-                plugin.isBackingUp = true;
                 Backup.backup(plugin, sender);
 
                 new BukkitRunnable(){
@@ -234,6 +239,24 @@ public class TimeMachineCommand implements CommandExecutor {
             Restore.selectedChunks = new ArrayList<>();
             sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Selected chunks were discarded");
 
+            return true;
+        }
+        else if(args[0].equalsIgnoreCase("deletebackup")){
+            if(args.length != 2){
+                sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Invalid input");
+            }
+            backupFile = new File(plugin.backups.getAbsolutePath() + File.separator + args[1]);
+            if(!backupFile.exists()){
+                sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Backup not found");
+                return true;
+            }
+            try {
+                FileUtils.forceDelete(backupFile);
+                sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Backup deleted: " + backupFile.getName());
+            } catch (IOException e) {
+                sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Backup could not be deleted");
+
+            }
             return true;
         }
         sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Unknown command. /tm for available commands");

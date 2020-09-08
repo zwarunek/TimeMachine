@@ -12,9 +12,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -74,6 +72,7 @@ public class TimeMachine extends JavaPlugin{
         getCommand("timemachine").setTabCompleter(tabCompleter);
         if(!backups.exists())
             backups.mkdir();
+        new Backup().autosave(this);
     }
 
     @Override
@@ -104,5 +103,4 @@ public class TimeMachine extends JavaPlugin{
         Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_GRAY +      "*************************************************************" + ChatColor.WHITE + author.get(0));
 
     }
-
 }

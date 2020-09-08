@@ -47,7 +47,7 @@ public class UpdateChecker {
                     check(this);
                 });
             }
-        }.runTaskTimer(javaPlugin, 0, checkInterval);
+        }.runTaskTimer(javaPlugin, 0, checkInterval * 20);
     }
     public void check(BukkitRunnable runable){
         try {
