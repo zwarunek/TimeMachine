@@ -1,8 +1,8 @@
 # Will there be automatic backups
 autoBackups: true
 
-# How often the server will automatically backup in minutes
-autoBackupFrequency: 1440
+# How often the server will automatically backup in seconds; default is every 12 hours
+autoBackupFrequency: 43200
 
 backupFolderDirectory: ''
 
@@ -32,5 +32,5 @@ dateFormat: 'yyyy-MM-dd_HH-mm-ss'
 # IF you want full player saves that are in that world to be rolled back or not(Location will always be rolled back)
 restorePlayerWithWorld: true
 
-# Amount of ticks between update checks
-updateCheckInterval: 72000
+# Amount of seconds between update checks
+updateCheckInterval: 3600

@@ -1,10 +1,12 @@
 package com.github.zwarunek.timemachine;
 
+import com.github.zwarunek.timemachine.commands.Backup;
 import com.github.zwarunek.timemachine.items.ChunkWand;
 import com.github.zwarunek.timemachine.util.ItemListener;
 import com.github.zwarunek.timemachine.util.TimeMachineCommand;
 import com.github.zwarunek.timemachine.util.TimeMachineTabCompleter;
 import com.github.zwarunek.timemachine.util.UpdateChecker;
+import com.tchristofferson.configupdater.ConfigUpdater;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -42,6 +44,14 @@ public class TimeMachine extends JavaPlugin{
         new UpdateChecker(this).checkForUpdate();
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();
+
+        File langFile = new File(this.getDataFolder(), "config.yml");
+        try {
+            ConfigUpdater.update(this, "config.yml", langFile, Arrays.asList("none"));
+        } catch (IOException e) {
+            this.getServer().getConsoleSender().sendMessage(e.getMessage());
+        }
+        this.reloadConfig();
         mainDir = getDataFolder().getAbsoluteFile().getParentFile().getParentFile();
         playerDataDir = new File(mainDir.getAbsolutePath() + File.separator + "world" + File.separator + "playerdata");
         pluginDir = new File(mainDir.getAbsolutePath() + File.separator + "plugins");
