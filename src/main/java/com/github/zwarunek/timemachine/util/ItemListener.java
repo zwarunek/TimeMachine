@@ -79,6 +79,22 @@ public class ItemListener implements Listener {
                 event.setCancelled( true );
             }
         }
+
+        if(event.getView().getTitle().equalsIgnoreCase(ChatColor.DARK_AQUA + "Time Machine GUI")){
+            ItemStack clickedItem = event.getCurrentItem();
+            System.out.println("inside time machine gui");
+            if(clickedItem == null){
+                event.setCancelled(true);
+                return;
+            }
+            if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.AQUA + "Chunk Wand")){
+                System.out.println("inside if");
+
+                plugin.command.handleCommand(event.getWhoClicked(), new String[]{"wand"});
+            }
+
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -98,4 +114,8 @@ public class ItemListener implements Listener {
         }
     }
 
+    @EventHandler
+    public void clickEvent(InventoryClickEvent event){
+
+    }
 }

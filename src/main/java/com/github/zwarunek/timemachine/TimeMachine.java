@@ -34,6 +34,7 @@ public class TimeMachine extends JavaPlugin{
     public List<String> backupExtensionExceptions;
     public final String version = this.getDescription().getVersion();
     public final List<String> author = this.getDescription().getAuthors();
+    public TimeMachineCommand command;
 
 
     @Override
@@ -63,8 +64,8 @@ public class TimeMachine extends JavaPlugin{
         backupExtensionExceptions = (List<String>)getConfig().getList("backupExtensionExceptions");
         backupFolderExceptions = (List<String>)getConfig().getList("backupFolderExceptions");
 
-        chunkWand = new ChunkWand();
-        final TimeMachineCommand command = new TimeMachineCommand(this);
+        chunkWand = new ChunkWand(this);
+        command = new TimeMachineCommand(this);
         final TimeMachineTabCompleter tabCompleter = new TimeMachineTabCompleter(this);
         ItemListener itemListener = new ItemListener(this);
         getServer().getPluginManager().registerEvents(itemListener, this);
@@ -77,7 +78,9 @@ public class TimeMachine extends JavaPlugin{
 
     @Override
     public void onDisable() {
+
         if(chunkWand.isInUse){
+            chunkWand.deselectChunks();
             chunkWand.player.getInventory().remove(chunkWand.chunkWand);
         }
     }
@@ -100,7 +103,6 @@ public class TimeMachine extends JavaPlugin{
         Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_AQUA + "/_/ /_/_/_/_/\\__/ /_/  /_/\\_,_/\\__/_//_/_/_//_/\\__/ ");
         Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_GRAY +      "        Version " + ChatColor.GOLD + version);
         Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_GRAY +      "        Author  " + ChatColor.WHITE + author.get(0));
-        Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_GRAY +      "*************************************************************" + ChatColor.WHITE + author.get(0));
 
     }
 }

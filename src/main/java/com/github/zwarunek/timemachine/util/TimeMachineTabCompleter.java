@@ -33,7 +33,7 @@ public class TimeMachineTabCompleter implements TabCompleter {
 
         switch (args.length) {
             case 1:
-                commands = Arrays.asList("backup", "restore", "deletebackup", "wand", "saveselectedchunks", "discardsavedchunks");
+                commands = Arrays.asList("backup", "restore", "deletebackup", "wand", "saveselectedchunks", "discardsavedchunks", "gui");
                 for (String f : commands)
                     if (f.toLowerCase().startsWith(args[0].toLowerCase()))
                         list.add(f);

@@ -2,9 +2,9 @@ package com.github.zwarunek.timemachine.util;
 
 import com.github.zwarunek.timemachine.TimeMachine;
 import com.github.zwarunek.timemachine.commands.Backup;
+import com.github.zwarunek.timemachine.commands.GUI;
 import com.github.zwarunek.timemachine.commands.Restore;
 import com.github.zwarunek.timemachine.items.ChunkWand;
-import com.tchristofferson.configupdater.ConfigUpdater;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -13,8 +13,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -22,7 +20,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -35,6 +32,10 @@ public class TimeMachineCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        return handleCommand(sender, args);
+    }
+    public boolean handleCommand(CommandSender sender, String[] args){
+
         File backupFile;
         String world;
         if(!sender.hasPermission("timemachine")){
@@ -222,24 +223,38 @@ public class TimeMachineCommand implements CommandExecutor {
             }
         }
         else if(args[0].equalsIgnoreCase("saveselectedchunks")){
-            for(ItemStack stack : ((Player)sender).getInventory().getContents()){
-                if(stack != null && stack.hasItemMeta() && stack.getItemMeta().hasLore() && stack.getItemMeta().getLore().equals(ChunkWand.getLore())) {
-                    List<Chunk> chunks = new ArrayList<>();
-                    for(TMChunk tmChunk : plugin.chunkWand.getSelectedChunks()){
-                        chunks.add(tmChunk.getChunk());
+
+            if(sender instanceof Player) {
+                for(ItemStack stack : ((Player)sender).getInventory().getContents()){
+                    if(stack != null && stack.hasItemMeta() && stack.getItemMeta().hasLore() && stack.getItemMeta().getLore().equals(ChunkWand.getLore())) {
+                        List<Chunk> chunks = new ArrayList<>();
+                        for(TMChunk tmChunk : plugin.chunkWand.getSelectedChunks()){
+                            chunks.add(tmChunk.getChunk());
+                        }
+                        Restore.setSelectedChunks(chunks);
+                        plugin.chunkWand.deselectChunks();
+                        sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Saved selected chunks");
+
+                        return true;
                     }
-                    Restore.setSelectedChunks(chunks);
-                    sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Saved selected chunks");
-                    return true;
                 }
+            }
+            else{
+                sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Consoles cannot use this");
+                return true;
             }
             sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Not saved, you dont have a chunk wand");
             return true;
         }
         else if(args[0].equalsIgnoreCase("discardsavedchunks")){
-            Restore.selectedChunks = new ArrayList<>();
-            sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Selected chunks were discarded");
-
+            if(sender instanceof Player) {
+                Restore.selectedChunks = new ArrayList<>();
+                plugin.chunkWand.deselectChunks();
+                sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Selected chunks were discarded");
+            }
+            else{
+                sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Consoles cannot use this");
+            }
             return true;
         }
         else if(args[0].equalsIgnoreCase("deletebackup")){
@@ -257,6 +272,15 @@ public class TimeMachineCommand implements CommandExecutor {
             } catch (IOException e) {
                 sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Backup could not be deleted");
 
+            }
+            return true;
+        }
+        else if(args[0].equalsIgnoreCase("gui")){
+            if(sender instanceof Player) {
+                new GUI((Player) sender);
+            }
+            else{
+                sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Consoles cannot access this");
             }
             return true;
         }
