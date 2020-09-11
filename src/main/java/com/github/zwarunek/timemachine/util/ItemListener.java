@@ -1,6 +1,7 @@
 package com.github.zwarunek.timemachine.util;
 
 import com.github.zwarunek.timemachine.TimeMachine;
+import com.github.zwarunek.timemachine.commands.GUI;
 import com.github.zwarunek.timemachine.items.ChunkWand;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -80,17 +81,61 @@ public class ItemListener implements Listener {
             }
         }
 
-        if(event.getView().getTitle().equalsIgnoreCase(ChatColor.DARK_AQUA + "Time Machine GUI")){
+        if(event.getView().getTitle().equalsIgnoreCase(ChatColor.DARK_AQUA + "Time Machine")){
             ItemStack clickedItem = event.getCurrentItem();
-            System.out.println("inside time machine gui");
             if(clickedItem == null){
                 event.setCancelled(true);
                 return;
             }
-            if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.AQUA + "Chunk Wand")){
-                System.out.println("inside if");
-
+            if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Backup")){
+                plugin.command.handleCommand(event.getWhoClicked(), new String[]{"backup"});
+                event.getWhoClicked().closeInventory();
+            }
+            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Restore")){
+                event.getWhoClicked().closeInventory();
+                GUI.createRestore(plugin, (Player) event.getWhoClicked());
+            }
+            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.AQUA + "Chunk Wand")){
                 plugin.command.handleCommand(event.getWhoClicked(), new String[]{"wand"});
+                event.getWhoClicked().closeInventory();
+            }
+            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Save Selected Chunks")){
+                plugin.command.handleCommand(event.getWhoClicked(), new String[]{"saveselectedchunks"});
+                event.getWhoClicked().closeInventory();
+            }
+            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Discard Saved Chunks")){
+                plugin.command.handleCommand(event.getWhoClicked(), new String[]{"discardsavedchunks"});
+                event.getWhoClicked().closeInventory();
+            }
+            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Delete Backups")){
+                plugin.command.handleCommand(event.getWhoClicked(), new String[]{"deletebackup"});
+                event.getWhoClicked().closeInventory();
+            }
+
+            event.setCancelled(true);
+        }
+
+        if(event.getView().getTitle().equalsIgnoreCase(ChatColor.DARK_AQUA + "TM Restore")){
+            ItemStack clickedItem = event.getCurrentItem();
+            if(clickedItem == null){
+                event.setCancelled(true);
+                return;
+            }
+            if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Server")){
+                plugin.command.handleCommand(event.getWhoClicked(), new String[]{"backup"});
+                event.getWhoClicked().closeInventory();
+            }
+            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "World")){
+                event.getWhoClicked().closeInventory();
+                GUI.createRestore(plugin, (Player) event.getWhoClicked());
+            }
+            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Player")){
+                event.getWhoClicked().closeInventory();
+                GUI.createRestorePlayer(plugin, (Player) event.getWhoClicked(), 1);
+            }
+            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Chunk")){
+                plugin.command.handleCommand(event.getWhoClicked(), new String[]{"deletebackup"});
+                event.getWhoClicked().closeInventory();
             }
 
             event.setCancelled(true);

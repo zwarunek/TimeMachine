@@ -80,13 +80,13 @@ public class ChunkWand{
         return selectedChunks;
     }
     public void deselectChunks(){
-        new BukkitRunnable(){
-            @Override
-            public void run() {
-                for(TMChunk chunk : selectedChunks)
-                    chunk.hideBorder(player);
-            }
-        }.runTask(plugin);
+//        new BukkitRunnable(){
+//            @Override
+//            public void run() {
+        for(TMChunk chunk : selectedChunks)
+            chunk.hideBorder(player);
+//            }
+//        }.runTask(plugin);
         selectedChunks = new ArrayList<>();
     }
 }

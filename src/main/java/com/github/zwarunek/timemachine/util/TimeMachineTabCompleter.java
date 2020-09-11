@@ -68,13 +68,14 @@ public class TimeMachineTabCompleter implements TabCompleter {
                             }
                             break;
                         case "player":
-                            OfflinePlayer[] players = Bukkit.getOfflinePlayers();
                             if ("all_players".startsWith(args[2].toLowerCase()))
                                 list.add("all_players");
 
-                            for (OfflinePlayer player : players)
-                                if (player.getName() != null && player.getName().startsWith(args[2].toLowerCase()))
+                            for (OfflinePlayer player : plugin.offlinePlayers)
+                                if (player.getName() != null &&
+                                        player.getName().startsWith(args[2].toLowerCase())){
                                     list.add(player.getName());
+                                }
                             break;
                     }
                     return list;
