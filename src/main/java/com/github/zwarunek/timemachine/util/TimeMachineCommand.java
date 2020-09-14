@@ -51,6 +51,7 @@ public class TimeMachineCommand implements CommandExecutor {
                     "/tm restore chunk <world> <x,z|x,z|...:selected> <backup> : Restores chunks to backup\n" +
                     "/tm wand : Gives player the chunk selector wand\n" +
                     "/tm wand cancel : Removes wand and currently selected chunks\n" +
+                    "/tm gui : Opens the Time Machine GUI\n" +
                     "/tm saveselectedchunks : Saves selected wand chunks\n" +
                     "/tm discardsavedchunks : Deselect all wand chunks\n" +
                     "/tm deletebackup <backup> : Deletes the selected backup");
@@ -63,7 +64,7 @@ public class TimeMachineCommand implements CommandExecutor {
             }
             try {
                 sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + "Backup Started at " + plugin.dateFormat.format(new Date()));
-                Backup.backup(plugin, sender);
+                backupFile = Backup.backup(plugin, sender);
 
                 new BukkitRunnable(){
                     @Override
@@ -75,6 +76,8 @@ public class TimeMachineCommand implements CommandExecutor {
                         }
                     }
                 }.runTaskTimer(plugin, 20, 5);
+                plugin.getServer().getConsoleSender().sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Backup Complete!");
+                plugin.backupList.add(backupFile);
                 return true;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -162,7 +165,7 @@ public class TimeMachineCommand implements CommandExecutor {
                     try{
                         if(args[3].equalsIgnoreCase("selected")){
                             if(Restore.selectedChunks.isEmpty()){
-                                Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " There are no selected chunks");
+                                sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " There are no selected chunks");
                                 return true;
                             }
                             chunks = null;

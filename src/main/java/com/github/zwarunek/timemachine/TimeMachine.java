@@ -37,6 +37,7 @@ public class TimeMachine extends JavaPlugin{
     public final List<String> author = this.getDescription().getAuthors();
     public TimeMachineCommand command;
     public OfflinePlayer[] offlinePlayers;
+    public List<File> backupList;
 
 
     @Override
@@ -66,6 +67,7 @@ public class TimeMachine extends JavaPlugin{
         backupExtensionExceptions = (List<String>)getConfig().getList("backupExtensionExceptions");
         backupFolderExceptions = (List<String>)getConfig().getList("backupFolderExceptions");
 
+        backupList = getBackupFiles();
         fillOfflinePlayers();
         chunkWand = new ChunkWand(this);
         command = new TimeMachineCommand(this);
@@ -139,5 +141,12 @@ public class TimeMachine extends JavaPlugin{
         arr[end] = swapTemp;
 
         return i+1;
+    }
+    private List<File> getBackupFiles() {
+        List<File> list = new ArrayList<>();
+        if (backups.listFiles() != null) {
+            list.addAll(Arrays.asList(Objects.requireNonNull(backups.listFiles())));
+        }
+        return list;
     }
 }

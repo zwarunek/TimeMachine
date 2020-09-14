@@ -118,13 +118,11 @@ public class TimeMachineTabCompleter implements TabCompleter {
     }
 
     private List<String> getBackupFiles(List<String> list, String arg) {
-
-        if (plugin.backups.listFiles() != null) {
-            for (File f : Objects.requireNonNull(plugin.backups.listFiles())) {
+        if(!plugin.backupList.isEmpty())
+            for (File f : plugin.backupList) {
                 if (f.getName().toLowerCase().startsWith(arg.toLowerCase()))
                     list.add(f.getName());
             }
-        }
         return list;
     }
 }

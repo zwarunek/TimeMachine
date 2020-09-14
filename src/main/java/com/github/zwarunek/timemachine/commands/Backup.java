@@ -24,7 +24,7 @@ public class Backup {
     static TimeMachine plugin;
     static public int taskIndex;
 
-    public static void backup(final TimeMachine instance, CommandSender sender){
+    public static File backup(final TimeMachine instance, CommandSender sender){
         plugin = instance;
         plugin.isBackingUp = true;
         Bukkit.savePlayers();
@@ -82,6 +82,7 @@ public class Backup {
                 }
             }
         },0, 5);
+        return zipFile.getFile();
     }
     public void autosave(TimeMachine plugin){
 
