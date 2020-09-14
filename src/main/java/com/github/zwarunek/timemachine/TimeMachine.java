@@ -7,6 +7,7 @@ import com.github.zwarunek.timemachine.util.TimeMachineCommand;
 import com.github.zwarunek.timemachine.util.TimeMachineTabCompleter;
 import com.github.zwarunek.timemachine.util.UpdateChecker;
 import com.tchristofferson.configupdater.ConfigUpdater;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -63,6 +64,7 @@ public class TimeMachine extends JavaPlugin{
         backupExtensionExceptions = (List<String>)getConfig().getList("backupExtensionExceptions");
         backupFolderExceptions = (List<String>)getConfig().getList("backupFolderExceptions");
 
+        Metrics metrics = new Metrics(this, 8853);
         chunkWand = new ChunkWand();
         final TimeMachineCommand command = new TimeMachineCommand(this);
         final TimeMachineTabCompleter tabCompleter = new TimeMachineTabCompleter(this);
