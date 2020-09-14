@@ -91,37 +91,40 @@ public class ItemListener implements Listener {
                 return;
             }
             if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Backup")){
-                GUI.args = Collections.singletonList("backup");
+                GUI.args = Arrays.asList("backup");
                 event.getWhoClicked().closeInventory();
                 plugin.command.handleCommand(event.getWhoClicked(), GUI.args.toArray(new String[0]));
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Restore")){
-                GUI.args = Collections.singletonList("restore");
+                GUI.args = Arrays.asList("restore");
                 GUI.createRestore(plugin, (Player) event.getWhoClicked());
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.AQUA + "Chunk Wand")){
-                GUI.args = Collections.singletonList("wand");
+                GUI.args = Arrays.asList("wand");
                 event.getWhoClicked().closeInventory();
                 plugin.command.handleCommand(event.getWhoClicked(), GUI.args.toArray(new String[0]));
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Save Selected Chunks")){
-                GUI.args = Collections.singletonList("saveselectedchunks");
+                GUI.args = Arrays.asList("saveselectedchunks");
                 event.getWhoClicked().closeInventory();
                 plugin.command.handleCommand(event.getWhoClicked(), GUI.args.toArray(new String[0]));
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Discard Saved Chunks")){
-                GUI.args = Collections.singletonList("discardsavedchunks");
+                GUI.args = Arrays.asList("discardsavedchunks");
                 event.getWhoClicked().closeInventory();
                 plugin.command.handleCommand(event.getWhoClicked(), GUI.args.toArray(new String[0]));
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Delete Backups")){
-                GUI.args = Collections.singletonList("deletebackup");
+                GUI.args = Arrays.asList("deletebackup");
+                GUI.createSelectBackup(plugin, (Player) event.getWhoClicked(), 1);
+            }
+            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Delete Backups")){
+                GUI.args = Arrays.asList("deletebackup");
                 GUI.createSelectBackup(plugin, (Player) event.getWhoClicked(), 1);
             }
 
             event.setCancelled(true);
         }
-
         if(event.getView().getTitle().equalsIgnoreCase(ChatColor.DARK_AQUA + "TM Restore")){
             ItemStack clickedItem = event.getCurrentItem();
             if(clickedItem == null){
@@ -129,22 +132,22 @@ public class ItemListener implements Listener {
                 return;
             }
             if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Server")){
-                GUI.args = Collections.singletonList("server");
+                GUI.argsAdd("server");
                 event.setCancelled(true);
                 GUI.createSelectBackup(plugin, (Player) event.getWhoClicked(), 1);
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "World")){
-                GUI.args = Collections.singletonList("world");
+                GUI.argsAdd("world");
                 event.setCancelled(true);
                 GUI.createSelectWorld(plugin, (Player) event.getWhoClicked(), 1);
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Player")){
-                GUI.args = Collections.singletonList("player");
+                GUI.argsAdd("player");
                 GUI.createSelectPlayer(plugin, (Player) event.getWhoClicked(), 1);
                 event.setCancelled(true);
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Chunk")){
-                GUI.args = Collections.singletonList("chunk");
+                GUI.args.add("chunk");
                 event.setCancelled(true);
                 event.getWhoClicked().closeInventory();
             }
@@ -172,38 +175,84 @@ public class ItemListener implements Listener {
                 event.setCancelled(true);
             }
             else if(clickedItem.getType().equals(Material.PLAYER_HEAD)){
+                GUI.args.add(((SkullMeta)clickedItem.getItemMeta()).getOwningPlayer().getName());
+                GUI.createRestorePlayer(plugin, (Player) event.getWhoClicked());
                 event.setCancelled(true);
-                ((SkullMeta)clickedItem.getItemMeta()).getOwningPlayer().getName();
             }
 
             event.setCancelled(true);
         }
-        if(event.getView().getTitle().equalsIgnoreCase(ChatColor.DARK_AQUA + "Select Backup")){
+        if(event.getView().getTitle().startsWith(ChatColor.DARK_AQUA + "Select Backup")){
             ItemStack clickedItem = event.getCurrentItem();
             if(clickedItem == null){
                 event.setCancelled(true);
                 return;
             }
-            if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Server")){
+            if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Page Left")){
+                GUI.createSelectPlayer(plugin, (Player) event.getWhoClicked(), 1 - Integer.parseInt(event.getView().getTitle().substring(event.getView().getTitle().length() - 1)));
                 event.setCancelled(true);
                 event.getWhoClicked().closeInventory();
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "World")){
-//                event.getWhoClicked().closeInventory();
+            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Page Right")){
+                GUI.createSelectPlayer(plugin, (Player) event.getWhoClicked(), 1 + Integer.parseInt(event.getView().getTitle().substring(event.getView().getTitle().length() - 1)));
                 event.setCancelled(true);
                 GUI.createRestore(plugin, (Player) event.getWhoClicked());
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Player")){
-//                event.getWhoClicked().closeInventory();
+            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Refresh")){
                 GUI.createSelectPlayer(plugin, (Player) event.getWhoClicked(), 1);
                 event.setCancelled(true);
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Chunk")){
-                event.setCancelled(true);
-                event.getWhoClicked().closeInventory();
-//                plugin.command.handleCommand(event.getWhoClicked(), new String[]{"deletebackup"});
+            else if(clickedItem.getType().equals(Material.MUSIC_DISC_13)){
+                GUI.args.add((clickedItem.getItemMeta()).getDisplayName());
+                plugin.command.handleCommand(event.getWhoClicked(), GUI.args.toArray(new String[0]));
             }
 
+            event.setCancelled(true);
+        }
+        if(event.getView().getTitle().startsWith(ChatColor.DARK_AQUA + "Select World")){
+            ItemStack clickedItem = event.getCurrentItem();
+            if(clickedItem == null){
+                event.setCancelled(true);
+                return;
+            }
+            if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Page Left")){
+                GUI.createSelectPlayer(plugin, (Player) event.getWhoClicked(), 1 - Integer.parseInt(event.getView().getTitle().substring(event.getView().getTitle().length() - 1)));
+                event.setCancelled(true);
+                event.getWhoClicked().closeInventory();
+            }
+            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Page Right")){
+                GUI.createSelectPlayer(plugin, (Player) event.getWhoClicked(), 1 + Integer.parseInt(event.getView().getTitle().substring(event.getView().getTitle().length() - 1)));
+                event.setCancelled(true);
+                GUI.createRestore(plugin, (Player) event.getWhoClicked());
+            }
+            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Refresh")){
+                GUI.createSelectPlayer(plugin, (Player) event.getWhoClicked(), 1);
+                event.setCancelled(true);
+            }
+            else if(clickedItem.getType().equals(Material.FIREWORK_STAR)){
+                GUI.args.add((clickedItem.getItemMeta()).getDisplayName());
+                plugin.command.handleCommand(event.getWhoClicked(), GUI.args.toArray(new String[0]));
+            }
+
+            event.setCancelled(true);
+        }
+        if(event.getView().getTitle().equalsIgnoreCase(ChatColor.DARK_AQUA + "Restore Player")){
+            ItemStack clickedItem = event.getCurrentItem();
+            if(clickedItem == null){
+                event.setCancelled(true);
+                return;
+            }
+            if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "All")){
+                GUI.args.add("all");
+            }
+            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Inventory")){
+                GUI.args.add("inventory");
+            }
+            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Ender Chest")){
+                GUI.args.add("enderchest");
+            }
+            event.setCancelled(true);
+            GUI.createSelectBackup(plugin, (Player) event.getWhoClicked(), 1);
             event.setCancelled(true);
         }
     }

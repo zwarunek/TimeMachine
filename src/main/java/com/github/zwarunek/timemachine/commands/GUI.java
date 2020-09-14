@@ -62,7 +62,6 @@ public class GUI {
 
         player.openInventory(gui);
     }
-
     public static void createRestore(TimeMachine plugin, Player player) {
         Inventory gui = Bukkit.createInventory(player, 9, ChatColor.DARK_AQUA + "TM Restore");
 
@@ -93,9 +92,8 @@ public class GUI {
 
         player.openInventory(gui);
     }
-
     public static void createSelectPlayer(TimeMachine plugin, Player player, int page){
-        Inventory gui = Bukkit.createInventory(player, 54, ChatColor.DARK_AQUA + "Restore Player");
+        Inventory gui = Bukkit.createInventory(player, 54, ChatColor.DARK_AQUA + "Restore Player - page " + page);
         int playersPerPage = 54 - 9;
         ItemStack blank = new ItemStack(Material.AIR);
         ItemStack refresh = new ItemStack(Material.LIME_DYE);
@@ -144,9 +142,34 @@ public class GUI {
 
         player.openInventory(gui);
     }
+    public static void createRestorePlayer(TimeMachine plugin, Player player) {
+        Inventory gui = Bukkit.createInventory(player, 9, ChatColor.DARK_AQUA + "Restore Player");
 
+        ItemStack all = new ItemStack(Material.EMERALD);
+        ItemStack inventory = new ItemStack(Material.FIREWORK_STAR);
+        ItemStack enderChest = new ItemStack(Material.PLAYER_HEAD);
+
+        ItemMeta serverMeta = all.getItemMeta();
+        serverMeta.setDisplayName(ChatColor.WHITE + "All");
+        all.setItemMeta(serverMeta);
+
+        ItemMeta worldMeta = inventory.getItemMeta();
+        worldMeta.setDisplayName(ChatColor.WHITE + "Inventory");
+        inventory.setItemMeta(worldMeta);
+
+        SkullMeta playerFileMeta = (SkullMeta)enderChest.getItemMeta();
+        playerFileMeta.setDisplayName(ChatColor.WHITE + "Ender Chest");
+        playerFileMeta.setOwningPlayer(player);
+        enderChest.setItemMeta(playerFileMeta);
+
+
+        ItemStack[] items = {all, inventory, enderChest};
+        gui.setContents(items);
+
+        player.openInventory(gui);
+    }
     public static void createSelectBackup(TimeMachine plugin, Player player, int page){
-        Inventory gui = Bukkit.createInventory(player, 54, ChatColor.DARK_AQUA + "Select Backup");
+        Inventory gui = Bukkit.createInventory(player, 54, ChatColor.DARK_AQUA + "Select Backup - page " + page);
         int filesPerPage = 54 - 9;
         ItemStack blank = new ItemStack(Material.AIR);
         ItemStack refresh = new ItemStack(Material.LIME_DYE);
@@ -195,7 +218,7 @@ public class GUI {
         player.openInventory(gui);
     }
     public static void createSelectWorld(TimeMachine plugin, Player player, int page){
-        Inventory gui = Bukkit.createInventory(player, 54, ChatColor.DARK_AQUA + "Select World");
+        Inventory gui = Bukkit.createInventory(player, 54, ChatColor.DARK_AQUA + "Select World - page " + page);
         int filesPerPage = 54 - 9;
         ItemStack blank = new ItemStack(Material.AIR);
         ItemStack refresh = new ItemStack(Material.LIME_DYE);
@@ -242,6 +265,10 @@ public class GUI {
         gui.setContents(items.toArray(new ItemStack[54]));
 
         player.openInventory(gui);
+    }
+    public static void argsAdd(String arg){
+        if(arg != null)
+            args.add(arg);
     }
 
 }
