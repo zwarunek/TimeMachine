@@ -1,6 +1,7 @@
 package com.github.zwarunek.timemachine;
 
 import com.github.zwarunek.timemachine.commands.Backup;
+import com.github.zwarunek.timemachine.commands.GUI;
 import com.github.zwarunek.timemachine.items.ChunkWand;
 import com.github.zwarunek.timemachine.util.ItemListener;
 import com.github.zwarunek.timemachine.util.TimeMachineCommand;
@@ -38,6 +39,7 @@ public class TimeMachine extends JavaPlugin{
     public TimeMachineCommand command;
     public OfflinePlayer[] offlinePlayers;
     public List<File> backupList;
+    public GUI gui;
 
 
     @Override
@@ -67,12 +69,13 @@ public class TimeMachine extends JavaPlugin{
         backupExtensionExceptions = (List<String>)getConfig().getList("backupExtensionExceptions");
         backupFolderExceptions = (List<String>)getConfig().getList("backupFolderExceptions");
 
+        gui = new GUI(this);
         backupList = getBackupFiles();
         fillOfflinePlayers();
         chunkWand = new ChunkWand(this);
         command = new TimeMachineCommand(this);
         final TimeMachineTabCompleter tabCompleter = new TimeMachineTabCompleter(this);
-        ItemListener itemListener = new ItemListener(this);
+        ItemListener itemListener = new ItemListener(this, gui);
         getServer().getPluginManager().registerEvents(itemListener, this);
         getCommand("timemachine").setExecutor(command);
         getCommand("timemachine").setTabCompleter(tabCompleter);

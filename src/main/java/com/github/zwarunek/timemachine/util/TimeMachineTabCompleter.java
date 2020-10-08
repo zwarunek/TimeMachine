@@ -95,6 +95,7 @@ public class TimeMachineTabCompleter implements TabCompleter {
                         }
                     }
                     else if(args[1].equalsIgnoreCase("chunk") && args[2] != null && sender instanceof Player){
+                        list.add("selected");
                         Chunk chunk = ((Player)sender).getLocation().getChunk();
                         String temp = chunk.getX() + "," + chunk.getZ();
                         if(temp.startsWith(args[3].toLowerCase()))

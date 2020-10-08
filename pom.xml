@@ -8,9 +8,12 @@
     <artifactId>TimeMachine</artifactId>
     <version>1.3.3</version>
 
+
+
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <junit.jupiter.version>5.6.2</junit.jupiter.version>
     </properties>
     <build>
         <resources>
@@ -36,7 +39,7 @@
                 <version>3.3.0</version>
                 <configuration>
                     <finalName>${artifactId}-${version}</finalName>
-                    <outputDirectory>C:\Users\zacha\Desktop\1.16.2 server\plugins</outputDirectory>
+                    <outputDirectory>C:\Users\zacha\IdeaProjects\TimeMachine\Test Server\plugins</outputDirectory>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
@@ -58,12 +61,16 @@
             <id>maven-central</id>
             <url>https://oss.sonatype.org/content/groups/public</url>
         </repository>
+        <repository>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
     </repositories>
     <dependencies>
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.16.2-R0.1-SNAPSHOT</version>
+            <version>1.16.3-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -91,5 +98,24 @@
             <artifactId>ConfigUpdater</artifactId>
             <version>1.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 </project>

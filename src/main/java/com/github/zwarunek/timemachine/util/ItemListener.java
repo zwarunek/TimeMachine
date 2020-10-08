@@ -20,6 +20,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.util.RayTraceResult;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -27,9 +28,11 @@ import java.util.Collections;
 public class ItemListener implements Listener {
 
     final private TimeMachine plugin;
+    private GUI gui;
 
-    public ItemListener(TimeMachine plugin){
+    public ItemListener(TimeMachine plugin, GUI gui){
         this.plugin = plugin;
+        this.gui = gui;
     }
 
     @EventHandler
@@ -74,16 +77,14 @@ public class ItemListener implements Listener {
                 }
             }
         }
+        if (clicked != event.getWhoClicked().getInventory()) {
 
-        if (clicked != event.getWhoClicked().getInventory()) { // Note: !=
-            // The cursor item is going into the top inventory
             ItemStack onCursor = event.getCursor();
 
             if (onCursor != null && event.getCurrentItem()!=null && event.getCurrentItem().getItemMeta().getDisplayName() != null && event.getCurrentItem().isSimilar(plugin.chunkWand.chunkWand)) {
                 event.setCancelled( true );
             }
         }
-
         if(event.getView().getTitle().equalsIgnoreCase(ChatColor.DARK_AQUA + "Time Machine")){
             ItemStack clickedItem = event.getCurrentItem();
             if(clickedItem == null){
@@ -91,39 +92,39 @@ public class ItemListener implements Listener {
                 return;
             }
             if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Backup")){
-                GUI.args = Arrays.asList("backup");
+                gui.args = Collections.singletonList("backup");
                 event.getWhoClicked().closeInventory();
-                plugin.command.handleCommand(event.getWhoClicked(), GUI.args.toArray(new String[0]));
+                plugin.command.handleCommand(event.getWhoClicked(), gui.args.toArray(new String[0]));
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Restore")){
-                GUI.args = Arrays.asList("restore");
-                GUI.createRestore(plugin, (Player) event.getWhoClicked());
+                gui.args = new ArrayList<>();
+                gui.args.add("restore");
+//                event.getWhoClicked().closeInventory();
+                gui.createRestore((Player) event.getWhoClicked());
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.AQUA + "Chunk Wand")){
-                GUI.args = Arrays.asList("wand");
+                gui.args = new ArrayList<>();
+                gui.args.add("wand");
                 event.getWhoClicked().closeInventory();
-                plugin.command.handleCommand(event.getWhoClicked(), GUI.args.toArray(new String[0]));
+                plugin.command.handleCommand(event.getWhoClicked(), gui.args.toArray(new String[0]));
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Save Selected Chunks")){
-                GUI.args = Arrays.asList("saveselectedchunks");
+                gui.args = new ArrayList<>();
+                gui.args.add("saveselectedchunks");
                 event.getWhoClicked().closeInventory();
-                plugin.command.handleCommand(event.getWhoClicked(), GUI.args.toArray(new String[0]));
+                plugin.command.handleCommand(event.getWhoClicked(), gui.args.toArray(new String[0]));
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Discard Saved Chunks")){
-                GUI.args = Arrays.asList("discardsavedchunks");
+                gui.args = new ArrayList<>();
+                gui.args.add("discardsavedchunks");
                 event.getWhoClicked().closeInventory();
-                plugin.command.handleCommand(event.getWhoClicked(), GUI.args.toArray(new String[0]));
+                plugin.command.handleCommand(event.getWhoClicked(), gui.args.toArray(new String[0]));
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Delete Backups")){
-                GUI.args = Arrays.asList("deletebackup");
-                GUI.createSelectBackup(plugin, (Player) event.getWhoClicked(), 1);
+                gui.args = new ArrayList<>();
+                gui.args.add("deletebackup");
+                gui.createSelectBackup((Player) event.getWhoClicked(), 1);
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Delete Backups")){
-                GUI.args = Arrays.asList("deletebackup");
-                GUI.createSelectBackup(plugin, (Player) event.getWhoClicked(), 1);
-            }
-
-            event.setCancelled(true);
         }
         if(event.getView().getTitle().equalsIgnoreCase(ChatColor.DARK_AQUA + "TM Restore")){
             ItemStack clickedItem = event.getCurrentItem();
@@ -132,27 +133,21 @@ public class ItemListener implements Listener {
                 return;
             }
             if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Server")){
-                GUI.argsAdd("server");
-                event.setCancelled(true);
-                GUI.createSelectBackup(plugin, (Player) event.getWhoClicked(), 1);
+                gui.args.add("server");
+                gui.createSelectBackup((Player) event.getWhoClicked(), 1);
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "World")){
-                GUI.argsAdd("world");
-                event.setCancelled(true);
-                GUI.createSelectWorld(plugin, (Player) event.getWhoClicked(), 1);
+                gui.args.add("world");
+                gui.createSelectWorld((Player) event.getWhoClicked(), 1);
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Player")){
-                GUI.argsAdd("player");
-                GUI.createSelectPlayer(plugin, (Player) event.getWhoClicked(), 1);
-                event.setCancelled(true);
+                gui.args.add("player");
+                gui.createSelectPlayer((Player) event.getWhoClicked(), 1);
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Chunk")){
-                GUI.args.add("chunk");
-                event.setCancelled(true);
-                event.getWhoClicked().closeInventory();
+            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Selected Chunks")){
+                gui.args.add("chunk");
+                gui.createSelectWorld((Player) event.getWhoClicked(), 1);
             }
-
-            event.setCancelled(true);
         }
         if(event.getView().getTitle().startsWith(ChatColor.DARK_AQUA + "Restore Player")){
             ItemStack clickedItem = event.getCurrentItem();
@@ -160,27 +155,21 @@ public class ItemListener implements Listener {
                 event.setCancelled(true);
                 return;
             }
+            int page = Integer.parseInt(event.getView().getTitle().substring(event.getView().getTitle().length() - 1));
+
             if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Page Left")){
-                GUI.createSelectPlayer(plugin, (Player) event.getWhoClicked(), 1 - Integer.parseInt(event.getView().getTitle().substring(event.getView().getTitle().length() - 1)));
-                event.setCancelled(true);
-                event.getWhoClicked().closeInventory();
+                gui.createSelectPlayer((Player) event.getWhoClicked(), page - 1);
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Page Right")){
-                GUI.createSelectPlayer(plugin, (Player) event.getWhoClicked(), 1 + Integer.parseInt(event.getView().getTitle().substring(event.getView().getTitle().length() - 1)));
-                event.setCancelled(true);
-                GUI.createRestore(plugin, (Player) event.getWhoClicked());
+                gui.createSelectPlayer((Player) event.getWhoClicked(), page + 1);
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Refresh")){
-                GUI.createSelectPlayer(plugin, (Player) event.getWhoClicked(), 1);
-                event.setCancelled(true);
+                gui.createSelectPlayer((Player) event.getWhoClicked(), 1);
             }
             else if(clickedItem.getType().equals(Material.PLAYER_HEAD)){
-                GUI.args.add(((SkullMeta)clickedItem.getItemMeta()).getOwningPlayer().getName());
-                GUI.createRestorePlayer(plugin, (Player) event.getWhoClicked());
-                event.setCancelled(true);
+                gui.args.add(((SkullMeta)clickedItem.getItemMeta()).getOwningPlayer().getName());
+                gui.createRestorePlayer((Player) event.getWhoClicked());
             }
-
-            event.setCancelled(true);
         }
         if(event.getView().getTitle().startsWith(ChatColor.DARK_AQUA + "Select Backup")){
             ItemStack clickedItem = event.getCurrentItem();
@@ -189,25 +178,20 @@ public class ItemListener implements Listener {
                 return;
             }
             if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Page Left")){
-                GUI.createSelectPlayer(plugin, (Player) event.getWhoClicked(), 1 - Integer.parseInt(event.getView().getTitle().substring(event.getView().getTitle().length() - 1)));
-                event.setCancelled(true);
+                gui.createSelectPlayer((Player) event.getWhoClicked(), 1 - Integer.parseInt(event.getView().getTitle().substring(event.getView().getTitle().length() - 1)));
                 event.getWhoClicked().closeInventory();
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Page Right")){
-                GUI.createSelectPlayer(plugin, (Player) event.getWhoClicked(), 1 + Integer.parseInt(event.getView().getTitle().substring(event.getView().getTitle().length() - 1)));
-                event.setCancelled(true);
-                GUI.createRestore(plugin, (Player) event.getWhoClicked());
+                gui.createSelectPlayer((Player) event.getWhoClicked(), 1 + Integer.parseInt(event.getView().getTitle().substring(event.getView().getTitle().length() - 1)));
+                gui.createRestore((Player) event.getWhoClicked());
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Refresh")){
-                GUI.createSelectPlayer(plugin, (Player) event.getWhoClicked(), 1);
-                event.setCancelled(true);
+                gui.createSelectPlayer((Player) event.getWhoClicked(), 1);
             }
             else if(clickedItem.getType().equals(Material.MUSIC_DISC_13)){
-                GUI.args.add((clickedItem.getItemMeta()).getDisplayName());
-                plugin.command.handleCommand(event.getWhoClicked(), GUI.args.toArray(new String[0]));
+                gui.args.add((clickedItem.getItemMeta()).getDisplayName());
+                plugin.command.handleCommand(event.getWhoClicked(), gui.args.toArray(new String[0]));
             }
-
-            event.setCancelled(true);
         }
         if(event.getView().getTitle().startsWith(ChatColor.DARK_AQUA + "Select World")){
             ItemStack clickedItem = event.getCurrentItem();
@@ -216,25 +200,29 @@ public class ItemListener implements Listener {
                 return;
             }
             if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Page Left")){
-                GUI.createSelectPlayer(plugin, (Player) event.getWhoClicked(), 1 - Integer.parseInt(event.getView().getTitle().substring(event.getView().getTitle().length() - 1)));
+                gui.createSelectPlayer((Player) event.getWhoClicked(), 1 - Integer.parseInt(event.getView().getTitle().substring(event.getView().getTitle().length() - 1)));
                 event.setCancelled(true);
                 event.getWhoClicked().closeInventory();
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Page Right")){
-                GUI.createSelectPlayer(plugin, (Player) event.getWhoClicked(), 1 + Integer.parseInt(event.getView().getTitle().substring(event.getView().getTitle().length() - 1)));
+                gui.createSelectPlayer((Player) event.getWhoClicked(), 1 + Integer.parseInt(event.getView().getTitle().substring(event.getView().getTitle().length() - 1)));
                 event.setCancelled(true);
-                GUI.createRestore(plugin, (Player) event.getWhoClicked());
+                gui.createRestore((Player) event.getWhoClicked());
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Refresh")){
-                GUI.createSelectPlayer(plugin, (Player) event.getWhoClicked(), 1);
+                gui.createSelectPlayer((Player) event.getWhoClicked(), 1);
                 event.setCancelled(true);
             }
             else if(clickedItem.getType().equals(Material.FIREWORK_STAR)){
-                GUI.args.add((clickedItem.getItemMeta()).getDisplayName());
-                plugin.command.handleCommand(event.getWhoClicked(), GUI.args.toArray(new String[0]));
+                gui.args.add((clickedItem.getItemMeta()).getDisplayName());
+                if(gui.args.contains("chunk")) {
+                    gui.args.add("selected");
+                    gui.createSelectBackup((Player) event.getWhoClicked(), 1);
+                }
+                else {
+                    plugin.command.handleCommand(event.getWhoClicked(), gui.args.toArray(new String[0]));
+                }
             }
-
-            event.setCancelled(true);
         }
         if(event.getView().getTitle().equalsIgnoreCase(ChatColor.DARK_AQUA + "Restore Player")){
             ItemStack clickedItem = event.getCurrentItem();
@@ -243,18 +231,18 @@ public class ItemListener implements Listener {
                 return;
             }
             if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "All")){
-                GUI.args.add("all");
+                gui.args.add("all");
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Inventory")){
-                GUI.args.add("inventory");
+                gui.args.add("inventory");
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Ender Chest")){
-                GUI.args.add("enderchest");
+                gui.args.add("enderchest");
             }
             event.setCancelled(true);
-            GUI.createSelectBackup(plugin, (Player) event.getWhoClicked(), 1);
-            event.setCancelled(true);
+            gui.createSelectBackup((Player) event.getWhoClicked(), 1);
         }
+        event.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

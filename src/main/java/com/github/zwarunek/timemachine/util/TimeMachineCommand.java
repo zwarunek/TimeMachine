@@ -280,7 +280,7 @@ public class TimeMachineCommand implements CommandExecutor {
         }
         else if(args[0].equalsIgnoreCase("gui")){
             if(sender instanceof Player) {
-                GUI.createMain(plugin, (Player) sender);
+                plugin.gui.createMain((Player) sender);
             }
             else{
                 sender.sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Consoles cannot access this");
