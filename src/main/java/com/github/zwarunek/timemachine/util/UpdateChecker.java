@@ -1,5 +1,6 @@
 package com.github.zwarunek.timemachine.util;
 
+import com.github.zwarunek.timemachine.TimeMachine;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -11,6 +12,9 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -22,7 +26,7 @@ public class UpdateChecker {
 
     private final JavaPlugin javaPlugin;
     private final String localPluginVersion;
-    private String spigotPluginVersion;
+    private String githubPluginVersion;
 
     //Constants. Customize to your liking.
     private static final int ID = 83621; //The ID of your resource. Can be found in the resource URL.
@@ -49,22 +53,37 @@ public class UpdateChecker {
             }
         }.runTaskTimer(javaPlugin, 0, checkInterval * 20);
     }
-    public void check(BukkitRunnable runable){
+    public void check(BukkitRunnable runable) {
         try {
-            final HttpsURLConnection connection = (HttpsURLConnection) new URL("https://api.spigotmc.org/legacy/update.php?resource=" + ID).openConnection();
+            final HttpsURLConnection connection = (HttpsURLConnection) new URL("https://api.github.com/repos/zwarunek/timemachine/releases/latest").openConnection();
             connection.setRequestMethod("GET");
-            spigotPluginVersion = new BufferedReader(new InputStreamReader(connection.getInputStream())).readLine();
-        } catch (final IOException e) {
-            Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.AQUA + "[Time Machine] " + ChatColor.RED + "Error checking for new version");
+
+            StringBuilder responseString = new StringBuilder();
+            BufferedReader in = new BufferedReader(new InputStreamReader(
+                    connection.getInputStream()));
+            String inputLine;
+
+            while ((inputLine = in.readLine()) != null) {
+                responseString.append(inputLine);
+            }
+            in.close();
+            JSONObject response;
+            JSONParser parser = new JSONParser();
+            Object temp = parser.parse(String.valueOf(responseString));
+            response = (JSONObject) temp;
+            githubPluginVersion = response.get("tag_name").toString().substring(1);
+            System.out.println();
+        } catch (final IOException | ParseException e) {
+            Bukkit.getServer().getConsoleSender().sendMessage(TimeMachine.NAME + "Error checking for new version");
             e.printStackTrace();
             runable.cancel();
             return;
         }
 
         //Check if the requested version is the same as the one in your plugin.yml.
-        if (localPluginVersion.equals(spigotPluginVersion)) return;
+        if (localPluginVersion.equals(githubPluginVersion)) return;
 
-        Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.AQUA + "[Time Machine] " + ChatColor.RED + "This is an outdated version. Version " + spigotPluginVersion + " is out at: " + ChatColor.RESET + "https://www.spigotmc.org/resources/" + ID + "/updates");
+        Bukkit.getServer().getConsoleSender().sendMessage(TimeMachine.NAME + "This is an outdated version. Version " + githubPluginVersion + " is out at: " + ChatColor.RESET + "https://www.spigotmc.org/resources/" + ID + "/history");
 
         //Register the PlayerJoinEvent
         Bukkit.getScheduler().runTask(javaPlugin, () -> Bukkit.getPluginManager().registerEvents(new Listener() {
@@ -72,7 +91,7 @@ public class UpdateChecker {
             public void onPlayerJoin(final PlayerJoinEvent event) {
                 final Player player = event.getPlayer();
                 if (!player.hasPermission(UPDATE_PERM)) return;
-                player.sendMessage(ChatColor.AQUA + "[Time Machine] " + ChatColor.RED + "This is an outdated version. Version " + spigotPluginVersion + " is out at: " + ChatColor.RESET + "https://www.spigotmc.org/resources/" + ID + "/updates");
+                player.sendMessage(TimeMachine.NAME + "This is an outdated version. Version " + githubPluginVersion + " is out at: " + ChatColor.RESET + "https://www.spigotmc.org/resources/" + ID + "/history");
             }
         }, javaPlugin));
         runable.cancel(); //Cancel the runnable as an update has been found.

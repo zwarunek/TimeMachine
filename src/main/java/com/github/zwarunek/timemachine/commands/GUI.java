@@ -22,10 +22,36 @@ public class GUI {
 
     public List<String> args;
     public TimeMachine plugin;
+    public ItemStack blank;
+    public ItemStack refresh;
+    public ItemStack pageRight;
+    public ItemStack pageLeft;
+    public ItemStack back;
 
     public GUI(TimeMachine plugin){
         this.plugin = plugin;
         this.args = new ArrayList<>();
+        this.blank = new ItemStack(Material.AIR);
+        this.refresh = new ItemStack(Material.LIME_DYE);
+        this.pageRight = new ItemStack(Material.PAPER);
+        this.pageLeft = new ItemStack(Material.PAPER);
+        this.back = new ItemStack(Material.BARRIER);
+
+        ItemMeta refreshMeta = refresh.getItemMeta();
+        refreshMeta.setDisplayName(ChatColor.WHITE + "Refresh");
+        refresh.setItemMeta(refreshMeta);
+
+        ItemMeta pageRightMeta = pageRight.getItemMeta();
+        pageRightMeta.setDisplayName(ChatColor.WHITE + "Page Right");
+        pageRight.setItemMeta(pageRightMeta);
+
+        ItemMeta pageLeftMeta = pageLeft.getItemMeta();
+        pageLeftMeta.setDisplayName(ChatColor.WHITE + "Page Left");
+        pageLeft.setItemMeta(pageLeftMeta);
+
+        ItemMeta backMeta = back.getItemMeta();
+        backMeta.setDisplayName(ChatColor.WHITE + "Back");
+        back.setItemMeta(backMeta);
     }
 
     public void createMain(Player player) {
@@ -94,7 +120,7 @@ public class GUI {
         chunkMeta.setDisplayName(ChatColor.WHITE + "Selected Chunks");
         chunk.setItemMeta(chunkMeta);
 
-        ItemStack[] items = {server, world, playerFile, chunk};
+        ItemStack[] items = {server, world, playerFile, chunk, blank, blank, blank, blank, back};
         gui.setContents(items);
 
         player.openInventory(gui);
@@ -103,39 +129,16 @@ public class GUI {
         int size = 54;
         Inventory gui = Bukkit.createInventory(player, size, ChatColor.DARK_AQUA + "Restore Player - page " + page);
         int playersPerPage = size - 9;
-        ItemStack blank = new ItemStack(Material.AIR);
-        ItemStack refresh = new ItemStack(Material.LIME_DYE);
-        ItemStack pageRight = new ItemStack(Material.PAPER);
-        ItemStack pageLeft = new ItemStack(Material.PAPER);
-
-        ItemMeta refreshMeta = refresh.getItemMeta();
-        refreshMeta.setDisplayName(ChatColor.WHITE + "Refresh");
-        refresh.setItemMeta(refreshMeta);
-
-        ItemMeta pageRightMeta = pageRight.getItemMeta();
-        pageRightMeta.setDisplayName(ChatColor.WHITE + "Page Right");
-        pageRight.setItemMeta(pageRightMeta);
-
-        ItemMeta pageLeftMeta = pageLeft.getItemMeta();
-        pageLeftMeta.setDisplayName(ChatColor.WHITE + "Page Left");
-        pageLeft.setItemMeta(pageLeftMeta);
-
         ArrayList<ItemStack> items = new ArrayList<>();
-//        List<OfflinePlayer> players = Arrays.asList(plugin.offlinePlayers);
-        List<OfflinePlayer> players = new ArrayList<>();
-        for(int i = 0; i < plugin.offlinePlayers.length; i++){
-            for(int j = 0; j < 40; j++)
-                players.add(plugin.offlinePlayers[i]);
-        }
-        if(players.subList(playersPerPage * (page - 1), players.size()).size() >= playersPerPage)
-            players = players.subList(playersPerPage * (page - 1), playersPerPage * page);
-        else if(players.isEmpty())
-            players = new ArrayList<>();
-        else
-            players = players.subList(playersPerPage * (page - 1), players.size());
+        ItemStack all = new ItemStack(Material.EMERALD);
+        ItemMeta allMeta = all.getItemMeta();
+        allMeta.setDisplayName(ChatColor.WHITE + "All");
+        all.setItemMeta(allMeta);
+        items.add(all);
+        List<OfflinePlayer> players = objectsOnPage(page, Arrays.asList(plugin.offlinePlayers), playersPerPage);
         OfflinePlayer player1;
         boolean addRightButton = true;
-        for(int i = 0; i<playersPerPage; i++){
+        for(int i = 0; i<playersPerPage - 1; i++){
             if(i<players.size()) {
                 player1 = players.get(i);
                 ItemStack playerStack = new ItemStack(Material.PLAYER_HEAD);
@@ -151,8 +154,7 @@ public class GUI {
                 addRightButton = false;
             }
         }
-
-        items.addAll(Arrays.asList(blank, blank, blank, page != 1 ? pageLeft : blank, refresh, addRightButton ? pageRight : blank, blank, blank, blank));
+        items.addAll(Arrays.asList(back, blank, blank, page != 1 ? pageLeft : blank, refresh, addRightButton ? pageRight : blank, blank, blank, blank));
         gui.setContents(items.toArray(new ItemStack[size]));
 
         player.openInventory(gui);
@@ -177,7 +179,7 @@ public class GUI {
         enderChest.setItemMeta(enderChestMeta);
 
 
-        ItemStack[] items = {all, inventory, enderChest};
+        ItemStack[] items = {all, inventory, enderChest, blank, blank, blank, blank, blank, back};
         gui.setContents(items);
 
         player.openInventory(gui);
@@ -185,32 +187,11 @@ public class GUI {
     public void createSelectBackup(Player player, int page){
         Inventory gui = Bukkit.createInventory(player, 54, ChatColor.DARK_AQUA + "Select Backup - page " + page);
         int filesPerPage = 54 - 9;
-        ItemStack blank = new ItemStack(Material.AIR);
-        ItemStack refresh = new ItemStack(Material.LIME_DYE);
-        ItemStack pageRight = new ItemStack(Material.PAPER);
-        ItemStack pageLeft = new ItemStack(Material.PAPER);
-
-        ItemMeta refreshMeta = refresh.getItemMeta();
-        refreshMeta.setDisplayName(ChatColor.WHITE + "Refresh");
-        refresh.setItemMeta(refreshMeta);
-
-        ItemMeta pageRightMeta = pageRight.getItemMeta();
-        pageRightMeta.setDisplayName(ChatColor.WHITE + "Page Right");
-        pageRight.setItemMeta(pageRightMeta);
-
-        ItemMeta pageLeftMeta = pageLeft.getItemMeta();
-        pageLeftMeta.setDisplayName(ChatColor.WHITE + "Page Left");
-        pageLeft.setItemMeta(pageLeftMeta);
-
         ArrayList<ItemStack> items = new ArrayList<>();
-        List<File> files = plugin.backupList;
-        if(files.subList(filesPerPage * (page - 1), files.size()).size() >= filesPerPage)
-            files = files.subList(filesPerPage * (page - 1), filesPerPage * page);
-        else if(files.isEmpty())
-            files = new ArrayList<>();
-        else
-            files = files.subList(filesPerPage * (page - 1), files.size());
+        List<File> files = objectsOnPage(page, plugin.backupList, filesPerPage);
+
         File file;
+        boolean addRightButton = true;
         for(int i = 0; i<filesPerPage; i++){
             if(i<files.size()) {
                 file = files.get(i);
@@ -223,10 +204,10 @@ public class GUI {
             }
             else{
                 items.add(new ItemStack(Material.AIR));
+                addRightButton = false;
             }
         }
-
-        items.addAll(Arrays.asList(blank, blank, blank, pageLeft, refresh, pageRight, blank, blank, blank));
+        items.addAll(Arrays.asList(back, blank, blank, page != 1 ? pageLeft : blank, refresh, addRightButton ? pageRight : blank, blank, blank, blank));
         gui.setContents(items.toArray(new ItemStack[54]));
 
         player.openInventory(gui);
@@ -234,34 +215,17 @@ public class GUI {
     public void createSelectWorld(Player player, int page){
         Inventory gui = Bukkit.createInventory(player, 54, ChatColor.DARK_AQUA + "Select World - page " + page);
         int filesPerPage = 54 - 9;
-        ItemStack blank = new ItemStack(Material.AIR);
-        ItemStack refresh = new ItemStack(Material.LIME_DYE);
-        ItemStack pageRight = new ItemStack(Material.PAPER);
-        ItemStack pageLeft = new ItemStack(Material.PAPER);
-
-        ItemMeta refreshMeta = refresh.getItemMeta();
-        assert refreshMeta != null;
-        refreshMeta.setDisplayName(ChatColor.WHITE + "Refresh");
-        refresh.setItemMeta(refreshMeta);
-
-        ItemMeta pageRightMeta = pageRight.getItemMeta();
-        pageRightMeta.setDisplayName(ChatColor.WHITE + "Page Right");
-        pageRight.setItemMeta(pageRightMeta);
-
-        ItemMeta pageLeftMeta = pageLeft.getItemMeta();
-        pageLeftMeta.setDisplayName(ChatColor.WHITE + "Page Left");
-        pageLeft.setItemMeta(pageLeftMeta);
-
         ArrayList<ItemStack> items = new ArrayList<>();
-        List<World> worlds = Bukkit.getWorlds();
-        if(worlds.subList(filesPerPage * (page - 1), worlds.size()).size() >= filesPerPage)
-            worlds = worlds.subList(filesPerPage * (page - 1), filesPerPage * page);
-        else if(worlds.isEmpty())
-            worlds = new ArrayList<>();
-        else
-            worlds = worlds.subList(filesPerPage * (page - 1), worlds.size());
+
+        ItemStack all = new ItemStack(Material.EMERALD);
+        ItemMeta allMeta = all.getItemMeta();
+        allMeta.setDisplayName(ChatColor.WHITE + "All");
+        all.setItemMeta(allMeta);
+        items.add(all);
+        List<World> worlds = objectsOnPage(page, Bukkit.getWorlds(), filesPerPage);
         World world;
-        for(int i = 0; i<filesPerPage; i++){
+        boolean addRightButton = true;
+        for(int i = 0; i<filesPerPage - 1; i++){
             if(i<worlds.size()) {
                 world = worlds.get(i);
                 ItemStack worldStack = new ItemStack(Material.FIREWORK_STAR);
@@ -273,13 +237,22 @@ public class GUI {
             }
             else{
                 items.add(new ItemStack(Material.AIR));
+                addRightButton = false;
             }
         }
-
-        items.addAll(Arrays.asList(blank, blank, blank, pageLeft, refresh, pageRight, blank, blank, blank));
+        items.addAll(Arrays.asList(back, blank, blank, page != 1 ? pageLeft : blank, refresh, addRightButton ? pageRight : blank, blank, blank, blank));
         gui.setContents(items.toArray(new ItemStack[54]));
 
         player.openInventory(gui);
     }
 
+    public <T> List<T> objectsOnPage(int page, List<T> list, int objectsPerPage){
+        if(list.subList(objectsPerPage * (page - 1), list.size()).size() >= objectsPerPage)
+            list = list.subList(objectsPerPage * (page - 1), objectsPerPage * page);
+        else if(list.isEmpty())
+            list = new ArrayList<>();
+        else
+            list = list.subList(objectsPerPage * (page - 1), list.size());
+        return list;
+    }
 }

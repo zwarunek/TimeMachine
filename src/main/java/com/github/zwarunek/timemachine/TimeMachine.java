@@ -40,6 +40,7 @@ public class TimeMachine extends JavaPlugin{
     public OfflinePlayer[] offlinePlayers;
     public List<File> backupList;
     public GUI gui;
+    public static final String NAME = ChatColor.AQUA + "[Time Machine] " + ChatColor.DARK_AQUA;
 
 
     @Override

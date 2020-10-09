@@ -23,6 +23,7 @@ import org.bukkit.util.RayTraceResult;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Objects;
 
 
 public class ItemListener implements Listener {
@@ -39,7 +40,7 @@ public class ItemListener implements Listener {
     public void onPlayerInteract(PlayerInteractEvent event){
         Player player = event.getPlayer();
         try{
-            if(event.getItem() != null && event.getItem().getItemMeta().getLore().equals(ChunkWand.getLore())){
+            if(event.getItem() != null && event.getItem().isSimilar(plugin.chunkWand.chunkWand)){
                 RayTraceResult rayTrace = player.rayTraceBlocks(200);
                 if(rayTrace != null ) {
                     Block block = rayTrace.getHitBlock();
@@ -61,7 +62,7 @@ public class ItemListener implements Listener {
         Item drop = event.getItemDrop();
         if(drop.getItemStack().isSimilar(plugin.chunkWand.chunkWand)) {
             drop.remove();
-            plugin.getServer().getConsoleSender().sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Chunk wand has been destroyed");
+            plugin.getServer().getConsoleSender().sendMessage(TimeMachine.NAME + "Chunk wand has been destroyed");
             plugin.chunkWand.isInUse = false;
         }
     }
@@ -81,7 +82,7 @@ public class ItemListener implements Listener {
 
             ItemStack onCursor = event.getCursor();
 
-            if (onCursor != null && event.getCurrentItem()!=null && event.getCurrentItem().getItemMeta().getDisplayName() != null && event.getCurrentItem().isSimilar(plugin.chunkWand.chunkWand)) {
+            if (onCursor != null && event.getCurrentItem() != null && event.getCurrentItem().isSimilar(plugin.chunkWand.chunkWand)) {
                 event.setCancelled( true );
             }
         }
@@ -99,7 +100,6 @@ public class ItemListener implements Listener {
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Restore")){
                 gui.args = new ArrayList<>();
                 gui.args.add("restore");
-//                event.getWhoClicked().closeInventory();
                 gui.createRestore((Player) event.getWhoClicked());
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.AQUA + "Chunk Wand")){
@@ -125,6 +125,7 @@ public class ItemListener implements Listener {
                 gui.args.add("deletebackup");
                 gui.createSelectBackup((Player) event.getWhoClicked(), 1);
             }
+            event.setCancelled(true);
         }
         if(event.getView().getTitle().equalsIgnoreCase(ChatColor.DARK_AQUA + "TM Restore")){
             ItemStack clickedItem = event.getCurrentItem();
@@ -148,8 +149,13 @@ public class ItemListener implements Listener {
                 gui.args.add("chunk");
                 gui.createSelectWorld((Player) event.getWhoClicked(), 1);
             }
+            else if (clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Back")){
+                gui.args.remove(gui.args.size() - 1);
+                gui.createMain((Player) event.getWhoClicked());
+            }
+            event.setCancelled(true);
         }
-        if(event.getView().getTitle().startsWith(ChatColor.DARK_AQUA + "Restore Player")){
+        if(event.getView().getTitle().startsWith(ChatColor.DARK_AQUA + "Restore Player - page")){
             ItemStack clickedItem = event.getCurrentItem();
             if(clickedItem == null){
                 event.setCancelled(true);
@@ -170,6 +176,15 @@ public class ItemListener implements Listener {
                 gui.args.add(((SkullMeta)clickedItem.getItemMeta()).getOwningPlayer().getName());
                 gui.createRestorePlayer((Player) event.getWhoClicked());
             }
+            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "All")){
+                gui.args.add((clickedItem.getItemMeta()).getDisplayName());
+                gui.createRestorePlayer((Player) event.getWhoClicked());
+            }
+            else if (clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Back")){
+                gui.args.remove(gui.args.size() - 1);
+                gui.createRestore((Player) event.getWhoClicked());
+            }
+            event.setCancelled(true);
         }
         if(event.getView().getTitle().startsWith(ChatColor.DARK_AQUA + "Select Backup")){
             ItemStack clickedItem = event.getCurrentItem();
@@ -186,12 +201,29 @@ public class ItemListener implements Listener {
                 gui.createRestore((Player) event.getWhoClicked());
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Refresh")){
-                gui.createSelectPlayer((Player) event.getWhoClicked(), 1);
+                gui.createSelectBackup((Player) event.getWhoClicked(), 1);
             }
             else if(clickedItem.getType().equals(Material.MUSIC_DISC_13)){
                 gui.args.add((clickedItem.getItemMeta()).getDisplayName());
                 plugin.command.handleCommand(event.getWhoClicked(), gui.args.toArray(new String[0]));
             }
+            else if (clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Back")){
+                if(gui.args.get(gui.args.size() - 1).equalsIgnoreCase("deletebackup")){
+                    gui.createMain((Player) event.getWhoClicked());
+                }
+                else if(gui.args.get(gui.args.size() - 1).equalsIgnoreCase("server")){
+                    gui.createRestore((Player) event.getWhoClicked());
+                }
+                else if(gui.args.contains("chunk") || gui.args.contains("world")){
+                    gui.createSelectWorld((Player) event.getWhoClicked(), 1);
+                }
+                else if(gui.args.contains("player")){
+                    gui.createRestorePlayer((Player) event.getWhoClicked());
+                }
+                gui.args.remove(gui.args.size() - 1);
+
+            }
+            event.setCancelled(true);
         }
         if(event.getView().getTitle().startsWith(ChatColor.DARK_AQUA + "Select World")){
             ItemStack clickedItem = event.getCurrentItem();
@@ -210,19 +242,22 @@ public class ItemListener implements Listener {
                 gui.createRestore((Player) event.getWhoClicked());
             }
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Refresh")){
-                gui.createSelectPlayer((Player) event.getWhoClicked(), 1);
+                gui.createSelectWorld((Player) event.getWhoClicked(), 1);
                 event.setCancelled(true);
             }
-            else if(clickedItem.getType().equals(Material.FIREWORK_STAR)){
+            else if(clickedItem.getType().equals(Material.FIREWORK_STAR) || clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "All")){
                 gui.args.add((clickedItem.getItemMeta()).getDisplayName());
                 if(gui.args.contains("chunk")) {
                     gui.args.add("selected");
-                    gui.createSelectBackup((Player) event.getWhoClicked(), 1);
                 }
-                else {
-                    plugin.command.handleCommand(event.getWhoClicked(), gui.args.toArray(new String[0]));
-                }
+                gui.createSelectBackup((Player) event.getWhoClicked(), 1);
             }
+            else if (clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Back")){
+                gui.args.remove(gui.args.size() - 1);
+                gui.createRestore((Player) event.getWhoClicked());
+
+            }
+            event.setCancelled(true);
         }
         if(event.getView().getTitle().equalsIgnoreCase(ChatColor.DARK_AQUA + "Restore Player")){
             ItemStack clickedItem = event.getCurrentItem();
@@ -239,17 +274,21 @@ public class ItemListener implements Listener {
             else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Ender Chest")){
                 gui.args.add("enderchest");
             }
-            event.setCancelled(true);
+            else if (clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Back")){
+                gui.args.remove(gui.args.size() - 1);
+                gui.createSelectPlayer((Player) event.getWhoClicked(), 1);
+                return;
+            }
             gui.createSelectBackup((Player) event.getWhoClicked(), 1);
+            event.setCancelled(true);
         }
-        event.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryDrag(InventoryDragEvent event) {
         ItemStack dragged = event.getOldCursor(); // This is the item that is being dragged
 
-        if (dragged.getItemMeta().getDisplayName() != null && dragged.isSimilar(plugin.chunkWand.chunkWand)) {
+        if (dragged.isSimilar(plugin.chunkWand.chunkWand)) {
             int inventorySize = event.getInventory().getSize(); // The size of the inventory, for reference
 
             // Now we go through all of the slots and check if the slot is inside our inventory (using the inventory size as reference)
