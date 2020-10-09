@@ -1,5 +1,6 @@
 package com.github.zwarunek.timemachine.items;
 
+import com.github.zwarunek.timemachine.TimeMachine;
 import com.github.zwarunek.timemachine.util.TMChunk;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -8,16 +9,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitScheduler;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ChunkWand{
+    public TimeMachine plugin;
     public boolean isInUse = false;
     public Player player;
     public ItemStack chunkWand;
     private List<TMChunk> selectedChunks = new ArrayList<>();
-    public ChunkWand(){
+    public ChunkWand(TimeMachine plugin){
+        this.plugin = plugin;
         chunkWand = new ItemStack(Material.BLAZE_ROD, 1);
         ItemMeta meta = chunkWand.getItemMeta();
         meta.setDisplayName(ChatColor.DARK_AQUA + "|" + ChatColor.AQUA + "Chunk Wand" + ChatColor.DARK_AQUA + "|");
@@ -75,6 +80,13 @@ public class ChunkWand{
         return selectedChunks;
     }
     public void deselectChunks(){
+//        new BukkitRunnable(){
+//            @Override
+//            public void run() {
+        for(TMChunk chunk : selectedChunks)
+            chunk.hideBorder(player);
+//            }
+//        }.runTask(plugin);
         selectedChunks = new ArrayList<>();
     }
 }

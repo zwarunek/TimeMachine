@@ -1,11 +1,16 @@
 package com.github.zwarunek.timemachine;
 
 import com.github.zwarunek.timemachine.commands.Backup;
+import com.github.zwarunek.timemachine.commands.GUI;
 import com.github.zwarunek.timemachine.items.ChunkWand;
-import com.github.zwarunek.timemachine.util.*;
+import com.github.zwarunek.timemachine.util.ItemListener;
+import com.github.zwarunek.timemachine.util.TimeMachineCommand;
+import com.github.zwarunek.timemachine.util.TimeMachineTabCompleter;
+import com.github.zwarunek.timemachine.util.UpdateChecker;
 import com.tchristofferson.configupdater.ConfigUpdater;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -31,6 +36,11 @@ public class TimeMachine extends JavaPlugin{
     public List<String> backupExtensionExceptions;
     public final String version = this.getDescription().getVersion();
     public final List<String> author = this.getDescription().getAuthors();
+    public TimeMachineCommand command;
+    public OfflinePlayer[] offlinePlayers;
+    public List<File> backupList;
+    public GUI gui;
+    public static final String NAME = ChatColor.AQUA + "[Time Machine] " + ChatColor.DARK_AQUA;
 
 
     @Override
@@ -60,11 +70,13 @@ public class TimeMachine extends JavaPlugin{
         backupExtensionExceptions = (List<String>)getConfig().getList("backupExtensionExceptions");
         backupFolderExceptions = (List<String>)getConfig().getList("backupFolderExceptions");
 
-        MetricsLite metrics = new MetricsLite(this, 8860);
-        chunkWand = new ChunkWand();
-        final TimeMachineCommand command = new TimeMachineCommand(this);
+        gui = new GUI(this);
+        backupList = getBackupFiles();
+        fillOfflinePlayers();
+        chunkWand = new ChunkWand(this);
+        command = new TimeMachineCommand(this);
         final TimeMachineTabCompleter tabCompleter = new TimeMachineTabCompleter(this);
-        ItemListener itemListener = new ItemListener(this);
+        ItemListener itemListener = new ItemListener(this, gui);
         getServer().getPluginManager().registerEvents(itemListener, this);
         getCommand("timemachine").setExecutor(command);
         getCommand("timemachine").setTabCompleter(tabCompleter);
@@ -76,6 +88,7 @@ public class TimeMachine extends JavaPlugin{
     @Override
     public void onDisable() {
         if(chunkWand.isInUse){
+            chunkWand.deselectChunks();
             chunkWand.player.getInventory().remove(chunkWand.chunkWand);
         }
     }
@@ -99,5 +112,44 @@ public class TimeMachine extends JavaPlugin{
         Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_GRAY +      "        Version " + ChatColor.GOLD + version);
         Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_GRAY +      "        Author  " + ChatColor.WHITE + author.get(0));
 
+    }
+    private void fillOfflinePlayers() {
+        offlinePlayers = Bukkit.getOfflinePlayers();
+        quickSort(offlinePlayers, 0, offlinePlayers.length - 1);
+    }
+    public void quickSort(OfflinePlayer arr[], int begin, int end) {
+        if (begin < end) {
+            int partitionIndex = partition(arr, begin, end);
+
+            quickSort(arr, begin, partitionIndex-1);
+            quickSort(arr, partitionIndex+1, end);
+        }
+    }
+    private int partition(OfflinePlayer arr[], int begin, int end) {
+        OfflinePlayer pivot = arr[end];
+        int i = (begin-1);
+
+        for (int j = begin; j < end; j++) {
+            if (arr[j].getName() != null && pivot.getName() != null && arr[j].hasPlayedBefore() && arr[j].getName().compareToIgnoreCase(pivot.getName()) <= 0) {
+                i++;
+
+                OfflinePlayer swapTemp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = swapTemp;
+            }
+        }
+
+        OfflinePlayer swapTemp = arr[i+1];
+        arr[i+1] = arr[end];
+        arr[end] = swapTemp;
+
+        return i+1;
+    }
+    private List<File> getBackupFiles() {
+        List<File> list = new ArrayList<>();
+        if (backups.listFiles() != null) {
+            list.addAll(Arrays.asList(Objects.requireNonNull(backups.listFiles())));
+        }
+        return list;
     }
 }

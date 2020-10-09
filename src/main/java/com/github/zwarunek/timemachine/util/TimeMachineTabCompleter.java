@@ -33,7 +33,7 @@ public class TimeMachineTabCompleter implements TabCompleter {
 
         switch (args.length) {
             case 1:
-                commands = Arrays.asList("backup", "restore", "deletebackup", "wand", "saveselectedchunks", "discardsavedchunks");
+                commands = Arrays.asList("backup", "restore", "deletebackup", "wand", "saveselectedchunks", "discardsavedchunks", "gui");
                 for (String f : commands)
                     if (f.toLowerCase().startsWith(args[0].toLowerCase()))
                         list.add(f);
@@ -68,13 +68,14 @@ public class TimeMachineTabCompleter implements TabCompleter {
                             }
                             break;
                         case "player":
-                            OfflinePlayer[] players = Bukkit.getOfflinePlayers();
                             if ("all_players".startsWith(args[2].toLowerCase()))
                                 list.add("all_players");
 
-                            for (OfflinePlayer player : players)
-                                if (player.getName() != null && player.getName().startsWith(args[2].toLowerCase()))
+                            for (OfflinePlayer player : plugin.offlinePlayers)
+                                if (player.getName() != null &&
+                                        player.getName().startsWith(args[2].toLowerCase())){
                                     list.add(player.getName());
+                                }
                             break;
                     }
                     return list;
@@ -94,6 +95,7 @@ public class TimeMachineTabCompleter implements TabCompleter {
                         }
                     }
                     else if(args[1].equalsIgnoreCase("chunk") && args[2] != null && sender instanceof Player){
+                        list.add("selected");
                         Chunk chunk = ((Player)sender).getLocation().getChunk();
                         String temp = chunk.getX() + "," + chunk.getZ();
                         if(temp.startsWith(args[3].toLowerCase()))
@@ -117,13 +119,11 @@ public class TimeMachineTabCompleter implements TabCompleter {
     }
 
     private List<String> getBackupFiles(List<String> list, String arg) {
-
-        if (plugin.backups.listFiles() != null) {
-            for (File f : Objects.requireNonNull(plugin.backups.listFiles())) {
+        if(!plugin.backupList.isEmpty())
+            for (File f : plugin.backupList) {
                 if (f.getName().toLowerCase().startsWith(arg.toLowerCase()))
                     list.add(f.getName());
             }
-        }
         return list;
     }
 }

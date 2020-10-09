@@ -12,6 +12,11 @@
       <option name="url" value="http://maven.icm.edu.pl/artifactory/repo" />
     </remote-repository>
     <remote-repository>
+      <option name="id" value="spigot-repo" />
+      <option name="name" value="spigot-repo" />
+      <option name="url" value="https://hub.spigotmc.org/nexus/content/repositories/snapshots/" />
+    </remote-repository>
+    <remote-repository>
       <option name="id" value="ICM" />
       <option name="name" value="ICM" />
       <option name="url" value="http://maven.icm.edu.pl/artifactory/repo/" />

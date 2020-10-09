@@ -24,7 +24,7 @@ public class Backup {
     static TimeMachine plugin;
     static public int taskIndex;
 
-    public static void backup(final TimeMachine instance, CommandSender sender){
+    public static File backup(final TimeMachine instance, CommandSender sender){
         plugin = instance;
         plugin.isBackingUp = true;
         Bukkit.savePlayers();
@@ -69,7 +69,7 @@ public class Backup {
                         bar.setTitle(ChatColor.DARK_AQUA + "Backing Up Server: " + ChatColor.GOLD + progressMonitor.getPercentDone() + "%");
                     }
                     if(print && progressMonitor.getPercentDone()%5==0) {
-                        plugin.getServer().getConsoleSender().sendMessage(ChatColor.AQUA + "[Time Machine]" + ChatColor.DARK_AQUA + " Backup: " + progressMonitor.getPercentDone() + "%");
+                        plugin.getServer().getConsoleSender().sendMessage(TimeMachine.NAME + "Backup: " + progressMonitor.getPercentDone() + "%");
                         print = false;
                     }
                     else if (!print && progressMonitor.getPercentDone()%5!=0){
@@ -82,6 +82,7 @@ public class Backup {
                 }
             }
         },0, 5);
+        return zipFile.getFile();
     }
     public void autosave(TimeMachine plugin){
 
