@@ -2,12 +2,8 @@ package com.github.zwarunek.timemachine;
 
 import com.github.zwarunek.timemachine.commands.Backup;
 import com.github.zwarunek.timemachine.items.ChunkWand;
-import com.github.zwarunek.timemachine.util.ItemListener;
-import com.github.zwarunek.timemachine.util.TimeMachineCommand;
-import com.github.zwarunek.timemachine.util.TimeMachineTabCompleter;
-import com.github.zwarunek.timemachine.util.UpdateChecker;
+import com.github.zwarunek.timemachine.util.*;
 import com.tchristofferson.configupdater.ConfigUpdater;
-import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -64,7 +60,7 @@ public class TimeMachine extends JavaPlugin{
         backupExtensionExceptions = (List<String>)getConfig().getList("backupExtensionExceptions");
         backupFolderExceptions = (List<String>)getConfig().getList("backupFolderExceptions");
 
-        Metrics metrics = new Metrics(this, 8853);
+        MetricsLite metrics = new MetricsLite(this, 8860);
         chunkWand = new ChunkWand();
         final TimeMachineCommand command = new TimeMachineCommand(this);
         final TimeMachineTabCompleter tabCompleter = new TimeMachineTabCompleter(this);
@@ -102,7 +98,6 @@ public class TimeMachine extends JavaPlugin{
         Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_AQUA + "/_/ /_/_/_/_/\\__/ /_/  /_/\\_,_/\\__/_//_/_/_//_/\\__/ ");
         Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_GRAY +      "        Version " + ChatColor.GOLD + version);
         Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_GRAY +      "        Author  " + ChatColor.WHITE + author.get(0));
-        Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_GRAY +      "*************************************************************" + ChatColor.WHITE + author.get(0));
 
     }
 }
