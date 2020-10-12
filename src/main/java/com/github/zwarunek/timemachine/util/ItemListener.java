@@ -73,12 +73,12 @@ public class ItemListener implements Listener {
             if (clicked == event.getWhoClicked().getInventory()) {
                 ItemStack clickedOn = event.getCurrentItem();
 
-                if (clickedOn != null && event.getCurrentItem().getItemMeta().getDisplayName() != null && event.getCurrentItem().isSimilar(plugin.chunkWand.chunkWand)) {
+                if (clickedOn != null && event.getCurrentItem().isSimilar(plugin.chunkWand.chunkWand)) {
                     event.setCancelled( true );
                 }
             }
         }
-        if (clicked != event.getWhoClicked().getInventory()) {
+        else if (clicked != event.getWhoClicked().getInventory()) {
 
             ItemStack onCursor = event.getCursor();
 
@@ -86,7 +86,7 @@ public class ItemListener implements Listener {
                 event.setCancelled( true );
             }
         }
-        if(event.getView().getTitle().equalsIgnoreCase(ChatColor.DARK_AQUA + "Time Machine")){
+        else if(event.getView().getTitle().equalsIgnoreCase(ChatColor.DARK_AQUA + "Time Machine")){
             ItemStack clickedItem = event.getCurrentItem();
             if(clickedItem == null){
                 event.setCancelled(true);
