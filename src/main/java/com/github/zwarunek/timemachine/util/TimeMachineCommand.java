@@ -19,6 +19,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -274,6 +275,7 @@ public class TimeMachineCommand implements CommandExecutor {
             try {
                 FileUtils.forceDelete(backupFile);
                 sender.sendMessage(TimeMachine.NAME + "Backup deleted: " + backupFile.getName());
+                plugin.getBackupFiles();
             } catch (IOException e) {
                 sender.sendMessage(TimeMachine.NAME + "Backup could not be deleted");
 

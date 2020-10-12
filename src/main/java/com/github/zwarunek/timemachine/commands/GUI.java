@@ -185,6 +185,7 @@ public class GUI {
         player.openInventory(gui);
     }
     public void createSelectBackup(Player player, int page){
+        plugin.getBackupFiles();
         Inventory gui = Bukkit.createInventory(player, 54, ChatColor.DARK_AQUA + "Select Backup - page " + page);
         int filesPerPage = 54 - 9;
         ArrayList<ItemStack> items = new ArrayList<>();
