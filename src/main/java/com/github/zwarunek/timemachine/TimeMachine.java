@@ -3,10 +3,7 @@ package com.github.zwarunek.timemachine;
 import com.github.zwarunek.timemachine.commands.Backup;
 import com.github.zwarunek.timemachine.commands.GUI;
 import com.github.zwarunek.timemachine.items.ChunkWand;
-import com.github.zwarunek.timemachine.util.ItemListener;
-import com.github.zwarunek.timemachine.util.TimeMachineCommand;
-import com.github.zwarunek.timemachine.util.TimeMachineTabCompleter;
-import com.github.zwarunek.timemachine.util.UpdateChecker;
+import com.github.zwarunek.timemachine.util.*;
 import com.tchristofferson.configupdater.ConfigUpdater;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -71,10 +68,13 @@ public class TimeMachine extends JavaPlugin{
         backupFolderExceptions = (List<String>)getConfig().getList("backupFolderExceptions");
 
         gui = new GUI(this);
-        backupList = getBackupFiles();
+        getBackupFiles();
         fillOfflinePlayers();
         chunkWand = new ChunkWand(this);
         command = new TimeMachineCommand(this);
+        MetricsLite metrics = new MetricsLite(this, 8860);
+//        chunkWand = new ChunkWand();
+        final TimeMachineCommand command = new TimeMachineCommand(this);
         final TimeMachineTabCompleter tabCompleter = new TimeMachineTabCompleter(this);
         ItemListener itemListener = new ItemListener(this, gui);
         getServer().getPluginManager().registerEvents(itemListener, this);
@@ -145,11 +145,10 @@ public class TimeMachine extends JavaPlugin{
 
         return i+1;
     }
-    private List<File> getBackupFiles() {
-        List<File> list = new ArrayList<>();
+    public void getBackupFiles() {
+        backupList = new ArrayList<>();
         if (backups.listFiles() != null) {
-            list.addAll(Arrays.asList(Objects.requireNonNull(backups.listFiles())));
+            backupList.addAll(Arrays.asList(Objects.requireNonNull(backups.listFiles())));
         }
-        return list;
     }
 }

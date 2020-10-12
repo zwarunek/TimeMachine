@@ -6,7 +6,7 @@
 
     <groupId>com.github.zwarunek</groupId>
     <artifactId>TimeMachine</artifactId>
-    <version>1.4.0</version>
+    <version>1.4.1</version>
 
 
 
@@ -39,7 +39,7 @@
                 <version>3.3.0</version>
                 <configuration>
                     <finalName>${artifactId}-${version}</finalName>
-                    <outputDirectory>C:\Users\zacha\IdeaProjects\TimeMachine\Test Server\plugins</outputDirectory>
+                    <outputDirectory>${project.basedir}\Test Server\plugins</outputDirectory>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
