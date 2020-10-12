@@ -222,11 +222,12 @@ public class GUI {
         ItemMeta allMeta = all.getItemMeta();
         allMeta.setDisplayName(ChatColor.WHITE + "All");
         all.setItemMeta(allMeta);
-        items.add(all);
+        if(!args.contains("chunk"))
+            items.add(all);
         List<World> worlds = objectsOnPage(page, Bukkit.getWorlds(), filesPerPage);
         World world;
         boolean addRightButton = true;
-        for(int i = 0; i<filesPerPage - 1; i++){
+        for(int i = 0; i<filesPerPage - (!args.contains("chunk")?1:0); i++){
             if(i<worlds.size()) {
                 world = worlds.get(i);
                 ItemStack worldStack = new ItemStack(Material.FIREWORK_STAR);
