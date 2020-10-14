@@ -126,7 +126,7 @@ public class TimeMachineCommand implements CommandExecutor {
                     break;
                 case "player":
                     String player = args[2];
-                    String playerUUID = "";
+                    String playerUUID = "all";
                     String part = args[3];
                     backupFile = new File(plugin.backups.getAbsolutePath() + File.separator + args[4]);
                     boolean playerExists = false;
@@ -136,9 +136,10 @@ public class TimeMachineCommand implements CommandExecutor {
                             playerUUID = p.getUniqueId().toString();
                         }
 
-                    if(!playerExists){
+                    if(!playerExists && !player.equalsIgnoreCase("all")){
                         sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Player not found");
                         return true;
+
                     }
                     if(backupFile.exists()){
                         try{
@@ -147,6 +148,7 @@ public class TimeMachineCommand implements CommandExecutor {
                             Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[SUCCESS]" + ChatColor.DARK_AQUA + " Restore Player: restored " + player + " to " + backupFile.getName());
                         }catch (Exception e){
                             sender.sendMessage(ChatColor.RED + "[FAILED]" + ChatColor.DARK_AQUA + " Restore failed. Stack trace printed in console");
+                            Bukkit.getConsoleSender().sendMessage(TimeMachine.NAME + "Restore failed. Stack trace printed in console");
                             Bukkit.getServer().getConsoleSender().sendMessage(e.getMessage());
                             return true;
                         }

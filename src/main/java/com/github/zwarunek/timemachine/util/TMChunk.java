@@ -58,7 +58,7 @@ public class TMChunk {
         List<Block> blocks = new ArrayList<>();
         for(int y = 0; y<256; y++){
             Block changingBlock = chunk.getBlock(x, y, z);
-            if(!changingBlock.getBlockData().getMaterial().isAir()){
+            if(!changingBlock.getBlockData().getMaterial().equals(Material.AIR)){
                 blocks.add(changingBlock);
             }
         }

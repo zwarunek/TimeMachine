@@ -38,10 +38,13 @@ public class TimeMachine extends JavaPlugin{
     public List<File> backupList;
     public GUI gui;
     public static final String NAME = ChatColor.AQUA + "[Time Machine] " + ChatColor.DARK_AQUA;
+    public static String mcVersion;
 
 
     @Override
     public void onEnable() {
+        String tempVersion = Bukkit.getServer().getClass().getPackage().toString();
+        mcVersion = tempVersion.substring(tempVersion.lastIndexOf('.') + 1, tempVersion.indexOf(','));
         displayBanner();
         new UpdateChecker(this).checkForUpdate();
         getConfig().options().copyDefaults(true);
@@ -111,11 +114,14 @@ public class TimeMachine extends JavaPlugin{
         Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_AQUA + "/_/ /_/_/_/_/\\__/ /_/  /_/\\_,_/\\__/_//_/_/_//_/\\__/ ");
         Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_GRAY +      "        Version " + ChatColor.GOLD + version);
         Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_GRAY +      "        Author  " + ChatColor.WHITE + author.get(0));
+        Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_GRAY +      "        MC Version " + ChatColor.GOLD + mcVersion);
 
     }
-    private void fillOfflinePlayers() {
-        offlinePlayers = Bukkit.getOfflinePlayers();
-        quickSort(offlinePlayers, 0, offlinePlayers.length - 1);
+    public void fillOfflinePlayers() {
+        try {
+            offlinePlayers = Bukkit.getOfflinePlayers();
+            quickSort(offlinePlayers, 0, offlinePlayers.length - 1);
+        }catch(NullPointerException ignored){}
     }
     public void quickSort(OfflinePlayer arr[], int begin, int end) {
         if (begin < end) {

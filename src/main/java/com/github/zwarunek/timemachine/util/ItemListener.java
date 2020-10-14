@@ -89,46 +89,50 @@ public class ItemListener implements Listener {
                 event.setCancelled( true );
             }
         }
-        if(event.getView().getTitle().equalsIgnoreCase(ChatColor.DARK_AQUA + "Time Machine")){
-            ItemStack clickedItem = event.getCurrentItem();
-            if(clickedItem == null){
-                event.setCancelled(true);
-                return;
-            }
-            if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Backup")){
+        ItemStack clickedItem = event.getCurrentItem();
+        if(clickedItem == null){
+            event.setCancelled(true);
+            return;
+        }
+        String inventory = ChatColor.stripColor(event.getView().getTitle());
+        String displayName = clickedItem.getItemMeta().getDisplayName();
+        String button = ChatColor.stripColor(displayName);
+        if(inventory.equalsIgnoreCase("Time Machine")){
+            
+            if(button.equals("Backup")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.args = Collections.singletonList("backup");
                 event.getWhoClicked().closeInventory();
                 plugin.command.handleCommand(event.getWhoClicked(), gui.args.toArray(new String[0]));
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Restore")){
+            else if(button.equals("Restore")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.args = new ArrayList<>();
                 gui.args.add("restore");
                 gui.createRestore((Player) event.getWhoClicked());
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.AQUA + "Chunk Wand")){
+            else if(button.equals("Chunk Wand")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.args = new ArrayList<>();
                 gui.args.add("wand");
                 event.getWhoClicked().closeInventory();
                 plugin.command.handleCommand(event.getWhoClicked(), gui.args.toArray(new String[0]));
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Save Selected Chunks")){
+            else if(button.equals("Save Selected Chunks")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.args = new ArrayList<>();
                 gui.args.add("saveselectedchunks");
                 event.getWhoClicked().closeInventory();
                 plugin.command.handleCommand(event.getWhoClicked(), gui.args.toArray(new String[0]));
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Discard Saved Chunks")){
+            else if(button.equals("Discard Saved Chunks")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.args = new ArrayList<>();
                 gui.args.add("discardsavedchunks");
                 event.getWhoClicked().closeInventory();
                 plugin.command.handleCommand(event.getWhoClicked(), gui.args.toArray(new String[0]));
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Delete Backups")){
+            else if(button.equals("Delete Backups")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.args = new ArrayList<>();
                 gui.args.add("deletebackup");
@@ -136,56 +140,46 @@ public class ItemListener implements Listener {
             }
             event.setCancelled(true);
         }
-        if(event.getView().getTitle().equalsIgnoreCase(ChatColor.DARK_AQUA + "TM Restore")){
-            ItemStack clickedItem = event.getCurrentItem();
-            if(clickedItem == null){
-                event.setCancelled(true);
-                return;
-            }
-            if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Server")){
+        if(inventory.equalsIgnoreCase("TM Restore")){
+            if(button.equals("Server")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.args.add("server");
                 gui.createSelectBackup((Player) event.getWhoClicked(), 1);
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "World")){
+            else if(button.equals("World")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.args.add("world");
                 gui.createSelectWorld((Player) event.getWhoClicked(), 1);
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Player")){
+            else if(button.equals("Player")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.args.add("player");
                 gui.createSelectPlayer((Player) event.getWhoClicked(), 1);
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Selected Chunks")){
+            else if(button.equals("Selected Chunks")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.args.add("chunk");
                 gui.createSelectWorld((Player) event.getWhoClicked(), 1);
             }
-            else if (clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Back")){
+            else if (button.equals("Back")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.args.remove(gui.args.size() - 1);
                 gui.createMain((Player) event.getWhoClicked());
             }
             event.setCancelled(true);
         }
-        if(event.getView().getTitle().startsWith(ChatColor.DARK_AQUA + "Restore Player - page")){
-            ItemStack clickedItem = event.getCurrentItem();
-            if(clickedItem == null){
-                event.setCancelled(true);
-                return;
-            }
+        if(inventory.startsWith("Restore Player - page")){
             int page = Integer.parseInt(event.getView().getTitle().substring(event.getView().getTitle().length() - 1));
 
-            if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Page Left")){
-                player.playSound(player.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 3F, .5F);
+            if(button.equals("Page Left")){
+                player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.createSelectPlayer((Player) event.getWhoClicked(), page - 1);
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Page Right")){
-                player.playSound(player.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 3F, .5F);
+            else if(button.equals("Page Right")){
+                player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.createSelectPlayer((Player) event.getWhoClicked(), page + 1);
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Refresh")){
+            else if(button.equals("Refresh")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.createSelectPlayer((Player) event.getWhoClicked(), 1);
             }
@@ -194,35 +188,30 @@ public class ItemListener implements Listener {
                 gui.args.add(((SkullMeta)clickedItem.getItemMeta()).getOwningPlayer().getName());
                 gui.createRestorePlayer((Player) event.getWhoClicked());
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "All")){
+            else if(button.equals("All")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
-                gui.args.add((clickedItem.getItemMeta()).getDisplayName());
+                gui.args.add("all");
                 gui.createRestorePlayer((Player) event.getWhoClicked());
             }
-            else if (clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Back")){
+            else if (button.equals("Back")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.args.remove(gui.args.size() - 1);
                 gui.createRestore((Player) event.getWhoClicked());
             }
             event.setCancelled(true);
         }
-        if(event.getView().getTitle().startsWith(ChatColor.DARK_AQUA + "Select Backup")){
-            ItemStack clickedItem = event.getCurrentItem();
-            if(clickedItem == null){
-                event.setCancelled(true);
-                return;
-            }
-            if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Page Left")){
-                player.playSound(player.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 3F, .5F);
+        if(inventory.startsWith("Select Backup")){
+            if(button.equals("Page Left")){
+                player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.createSelectPlayer((Player) event.getWhoClicked(), 1 - Integer.parseInt(event.getView().getTitle().substring(event.getView().getTitle().length() - 1)));
                 event.getWhoClicked().closeInventory();
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Page Right")){
-                player.playSound(player.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 3F, .5F);
+            else if(button.equals("Page Right")){
+                player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.createSelectPlayer((Player) event.getWhoClicked(), 1 + Integer.parseInt(event.getView().getTitle().substring(event.getView().getTitle().length() - 1)));
                 gui.createRestore((Player) event.getWhoClicked());
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Refresh")){
+            else if(button.equals("Refresh")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.createSelectBackup((Player) event.getWhoClicked(), 1);
             }
@@ -232,7 +221,7 @@ public class ItemListener implements Listener {
                 plugin.command.handleCommand(event.getWhoClicked(), gui.args.toArray(new String[0]));
                 event.getWhoClicked().closeInventory();
             }
-            else if (clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Back")){
+            else if (button.equals("Back")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 if(gui.args.get(gui.args.size() - 1).equalsIgnoreCase("deletebackup")){
                     gui.createMain((Player) event.getWhoClicked());
@@ -254,30 +243,23 @@ public class ItemListener implements Listener {
             }
             event.setCancelled(true);
         }
-        if(event.getView().getTitle().startsWith(ChatColor.DARK_AQUA + "Select World")){
-            ItemStack clickedItem = event.getCurrentItem();
-            if(clickedItem == null){
-                event.setCancelled(true);
-                return;
-            }
-            if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Page Left")){
-                player.playSound(player.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 3F, .5F);
+        if(inventory.startsWith("Select World")){
+            if(button.equals("Page Left")){
+                player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.createSelectPlayer((Player) event.getWhoClicked(), 1 - Integer.parseInt(event.getView().getTitle().substring(event.getView().getTitle().length() - 1)));
                 event.setCancelled(true);
                 event.getWhoClicked().closeInventory();
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Page Right")){
-                player.playSound(player.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 3F, .5F);
+            else if(button.equals("Page Right")){
+                player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.createSelectPlayer((Player) event.getWhoClicked(), 1 + Integer.parseInt(event.getView().getTitle().substring(event.getView().getTitle().length() - 1)));
-                event.setCancelled(true);
                 gui.createRestore((Player) event.getWhoClicked());
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Refresh")){
+            else if(button.equals("Refresh")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.createSelectWorld((Player) event.getWhoClicked(), 1);
-                event.setCancelled(true);
             }
-            else if(clickedItem.getType().equals(Material.FIREWORK_STAR) || clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "All")){
+            else if(clickedItem.getType().equals(Material.FIREWORK_STAR) || button.equals("All")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.args.add((clickedItem.getItemMeta()).getDisplayName());
                 if(gui.args.contains("chunk")) {
@@ -285,7 +267,7 @@ public class ItemListener implements Listener {
                 }
                 gui.createSelectBackup((Player) event.getWhoClicked(), 1);
             }
-            else if (clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Back")){
+            else if (button.equals("Back")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.args.remove(gui.args.size() - 1);
                 gui.createRestore((Player) event.getWhoClicked());
@@ -293,28 +275,23 @@ public class ItemListener implements Listener {
             }
             event.setCancelled(true);
         }
-        if(event.getView().getTitle().equalsIgnoreCase(ChatColor.DARK_AQUA + "Restore Player")){
-            ItemStack clickedItem = event.getCurrentItem();
-            if(clickedItem == null){
-                event.setCancelled(true);
-                return;
-            }
-            if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "All")){
+        if(inventory.equalsIgnoreCase("Restore Player")){
+            if(button.equals("All")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.args.add("all");
                 gui.createSelectBackup((Player) event.getWhoClicked(), 1);
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Inventory")){
+            else if(button.equals("Inventory")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.args.add("inventory");
                 gui.createSelectBackup((Player) event.getWhoClicked(), 1);
             }
-            else if(clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Ender Chest")){
+            else if(button.equals("Ender Chest")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.args.add("enderchest");
                 gui.createSelectBackup((Player) event.getWhoClicked(), 1);
             }
-            else if (clickedItem.getItemMeta().getDisplayName().equals(ChatColor.WHITE + "Back")){
+            else if (button.equals("Back")){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.args.remove(gui.args.size() - 1);
                 gui.createSelectPlayer((Player) event.getWhoClicked(), 1);

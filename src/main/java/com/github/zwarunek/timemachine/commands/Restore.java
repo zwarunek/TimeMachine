@@ -16,6 +16,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.io.*;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
 
 
 public class Restore {
@@ -63,14 +64,15 @@ public class Restore {
 
                 for(String playerFile : currentPlayers){
                     String uuid = new File(playerFile).getName();
-                    CompoundTag currentTag = NBTIO.readFile(plugin.mainDir + File.separator + "world" + File.separator + "playerdata" + File.separator + uuid);
+                    CompoundTag currentTag = readFile(plugin.mainDir + File.separator + "world" + File.separator + "playerdata" + File.separator + uuid);
                     currentTag.put(new ListTag(part));
 
                     if(backedPlayers.contains(uuid)) {
 
-                        CompoundTag backedTag = NBTIO.readFile(backupDir + File.separator + "TempPlayerFiles" + File.separator + uuid);
+                        CompoundTag backedTag = readFile(backupDir + File.separator + "TempPlayerFiles" + File.separator + uuid);
                         currentTag.put(backedTag.get(part));
                         NBTIO.writeFile(currentTag, plugin.mainDir + File.separator + "world" + File.separator + "playerdata" + File.separator + uuid);
+
                     }
                 }
                 FileUtils.forceDelete(new File(backupDir + File.separator + "TempPlayerFiles"));
@@ -93,8 +95,8 @@ public class Restore {
             else{
                 ZipFile zip = new ZipFile(backup);
                 zip.extractFile(plugin.mainDir.getName() + "/world/playerdata/" + player + ".dat", backupDir, "TempPlayerFile.dat");
-                CompoundTag backedTag = NBTIO.readFile(backupDir + File.separator + "TempPlayerFile.dat");
-                CompoundTag currentTag = NBTIO.readFile(plugin.mainDir + File.separator + "world" + File.separator + "playerdata" + File.separator + player +".dat");
+                CompoundTag backedTag = readFile(backupDir + File.separator + "TempPlayerFile.dat");
+                CompoundTag currentTag = readFile(plugin.mainDir + File.separator + "world" + File.separator + "playerdata" + File.separator + player +".dat");
                 currentTag.put(backedTag.get(part));
                 NBTIO.writeFile(currentTag, plugin.mainDir + File.separator + "world" + File.separator + "playerdata" + File.separator + player +".dat");
                 FileUtils.forceDelete(new File(backupDir + File.separator + "TempPlayerFile.dat"));
@@ -235,5 +237,17 @@ public class Restore {
     }
     public static void setSelectedChunks(List<Chunk> chunks){
         selectedChunks = chunks;
+    }
+    public static CompoundTag readFile(String str) throws IOException {
+        InputStream in = new FileInputStream(new File(str));
+        in = new GZIPInputStream(in);
+
+        Tag tag = NBTIO.readTag(in, false);
+        in.close();
+        if(!(tag instanceof CompoundTag)) {
+            throw new IOException("Root tag is not a CompoundTag!");
+        }
+
+        return (CompoundTag) tag;
     }
 }

@@ -16,6 +16,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import java.io.File;
+import java.sql.Time;
 import java.util.*;
 
 public class GUI {
@@ -126,6 +127,7 @@ public class GUI {
         player.openInventory(gui);
     }
     public void createSelectPlayer(Player player, int page){
+        plugin.fillOfflinePlayers();
         int size = 54;
         Inventory gui = Bukkit.createInventory(player, size, ChatColor.DARK_AQUA + "Restore Player - page " + page);
         int playersPerPage = size - 9;
