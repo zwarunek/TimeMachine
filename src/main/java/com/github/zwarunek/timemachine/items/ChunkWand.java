@@ -25,16 +25,16 @@ public class ChunkWand{
         this.plugin = plugin;
         chunkWand = new ItemStack(Material.BLAZE_ROD, 1);
         ItemMeta meta = chunkWand.getItemMeta();
-        meta.setDisplayName(ChatColor.DARK_AQUA + "|" + ChatColor.AQUA + "Chunk Wand" + ChatColor.DARK_AQUA + "|");
+        meta.setDisplayName(plugin.messages.getProperty("wandName"));
         meta.setLore(getLore());
         meta.addEnchant(Enchantment.LUCK, 1, false);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         chunkWand.setItemMeta(meta);
     }
-    public static List<String> getLore(){
+    public List<String> getLore(){
         List<String> lore = new ArrayList<>();
-        lore.add(ChatColor.GRAY + "Select Chunks by left click");
-        lore.add(ChatColor.GRAY + "Deselect Chunks by right click");
+        lore.add(plugin.messages.getProperty("wandLore1"));
+        lore.add(plugin.messages.getProperty("wandLore2"));
         return lore;
     }
     public ItemStack getChunkWand(Player player) {

@@ -39,65 +39,96 @@ public class GUI {
         this.back = new ItemStack(Material.BARRIER);
 
         ItemMeta refreshMeta = refresh.getItemMeta();
-        refreshMeta.setDisplayName(ChatColor.WHITE + "Refresh");
+        refreshMeta.setDisplayName(plugin.messages.getProperty("refreshBtnName"));
+        refreshMeta.setLore(Arrays.asList(plugin.messages.getProperty("refreshBtnLore")));
         refresh.setItemMeta(refreshMeta);
 
         ItemMeta pageRightMeta = pageRight.getItemMeta();
-        pageRightMeta.setDisplayName(ChatColor.WHITE + "Page Right");
+        pageRightMeta.setDisplayName(plugin.messages.getProperty("pageRightBtnName"));
+        pageRightMeta.setLore(Arrays.asList(plugin.messages.getProperty("pageRightBtnLore")));
         pageRight.setItemMeta(pageRightMeta);
 
         ItemMeta pageLeftMeta = pageLeft.getItemMeta();
-        pageLeftMeta.setDisplayName(ChatColor.WHITE + "Page Left");
+        pageLeftMeta.setDisplayName(plugin.messages.getProperty("pageLeftBtnName"));
+        pageLeftMeta.setLore(Arrays.asList(plugin.messages.getProperty("pageRightBtnLore")));
         pageLeft.setItemMeta(pageLeftMeta);
 
         ItemMeta backMeta = back.getItemMeta();
-        backMeta.setDisplayName(ChatColor.WHITE + "Back");
+        backMeta.setDisplayName(plugin.messages.getProperty("backBtnName"));
+        backMeta.setLore(Arrays.asList(plugin.messages.getProperty("backBtnLore")));
         back.setItemMeta(backMeta);
     }
 
     public void createMain(Player player) {
-        Inventory gui = Bukkit.createInventory(player, 9, ChatColor.DARK_AQUA + "Time Machine");
+        Inventory gui = Bukkit.createInventory(player, 9, plugin.messages.getProperty("timeMachineInv"));
 
         ItemStack backup = new ItemStack(Material.MUSIC_DISC_13);
         ItemStack restore = new ItemStack(Material.CLOCK);
         ItemStack wand = new ItemStack(Material.BLAZE_ROD);
-        ItemStack saveSelectedChunks = new ItemStack(Material.LIME_DYE);
-        ItemStack discardSelectedChunks = new ItemStack(Material.MAGENTA_DYE);
         ItemStack deleteBackups = new ItemStack(Material.MUSIC_DISC_11);
 
         ItemMeta backupMeta = backup.getItemMeta();
-        backupMeta.setDisplayName(ChatColor.WHITE + "Backup");
+        backupMeta.setDisplayName(plugin.messages.getProperty("backupBtnName"));
+        backupMeta.setLore(Arrays.asList(plugin.messages.getProperty("backupBtnlore")));
         backup.setItemMeta(backupMeta);
 
         ItemMeta restoreMeta = restore.getItemMeta();
-        restoreMeta.setDisplayName(ChatColor.WHITE + "Restore");
+        restoreMeta.setDisplayName(plugin.messages.getProperty("restoreBtnName"));
         restore.setItemMeta(restoreMeta);
 
         ItemMeta wandMeta = wand.getItemMeta();
-        wandMeta.setDisplayName(ChatColor.AQUA + "Chunk Wand");
+        wandMeta.setDisplayName(plugin.messages.getProperty("wandBtnName"));
         wandMeta.addEnchant(Enchantment.LUCK, 1, false);
         wandMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         wand.setItemMeta(wandMeta);
 
-        ItemMeta saveSelectedChunksMeta = saveSelectedChunks.getItemMeta();
-        saveSelectedChunksMeta.setDisplayName(ChatColor.WHITE + "Save Selected Chunks");
-        saveSelectedChunks.setItemMeta(saveSelectedChunksMeta);
-
-        ItemMeta discardSelectedChunksMeta = discardSelectedChunks.getItemMeta();
-        discardSelectedChunksMeta.setDisplayName(ChatColor.WHITE + "Discard Saved Chunks");
-        discardSelectedChunks.setItemMeta(discardSelectedChunksMeta);
-
         ItemMeta deleteBackupsMeta = deleteBackups.getItemMeta();
-        deleteBackupsMeta.setDisplayName(ChatColor.WHITE + "Delete Backups");
+        deleteBackupsMeta.setDisplayName(plugin.messages.getProperty("deleteBtnName"));
+        deleteBackupsMeta.setLore(Arrays.asList(plugin.messages.getProperty("deleteBtnlore")));
         deleteBackups.setItemMeta(deleteBackupsMeta);
 
-        ItemStack[] items = {backup, restore, wand, saveSelectedChunks, discardSelectedChunks, deleteBackups};
+        ItemStack[] items = {backup, restore, wand, deleteBackups};
+        gui.setContents(items);
+
+        player.openInventory(gui);
+    }
+    public void createWand(Player player) {
+        Inventory gui = Bukkit.createInventory(player, 9, plugin.messages.getProperty("wandInv"));
+
+        ItemStack give = new ItemStack(Material.BLAZE_ROD);
+        ItemStack cancel = new ItemStack(Material.ROSE_RED);
+        ItemStack select = new ItemStack(Material.LIME_DYE);
+        ItemStack deselect = new ItemStack(Material.MAGENTA_DYE);
+
+        ItemMeta giveMeta = give.getItemMeta();
+        giveMeta.setDisplayName(plugin.messages.getProperty("giveBtnName"));
+        giveMeta.addEnchant(Enchantment.LUCK, 1, false);
+        giveMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        giveMeta.setLore(Arrays.asList(plugin.messages.getProperty("giveBtnLore1"), plugin.messages.getProperty("giveBtnLore2"),plugin.messages.getProperty("giveBtnLore3"), plugin.messages.getProperty("giveBtnLore4")));
+        give.setItemMeta(giveMeta);
+
+        ItemMeta cancelMeta = cancel.getItemMeta();
+        cancelMeta.setDisplayName(plugin.messages.getProperty("cancelBtnName"));
+        cancelMeta.setLore(Arrays.asList(plugin.messages.getProperty("cancelBtnLore1"), plugin.messages.getProperty("cancelBtnLore2")));
+        cancel.setItemMeta(cancelMeta);
+
+        ItemMeta selectMeta = select.getItemMeta();
+        selectMeta.setDisplayName(plugin.messages.getProperty("selectBtnName"));
+        selectMeta.setLore(Arrays.asList(plugin.messages.getProperty("selectBtnLore")));
+        select.setItemMeta(selectMeta);
+
+        ItemMeta deselectMeta = deselect.getItemMeta();
+        deselectMeta.setDisplayName(plugin.messages.getProperty("deselectBtnName"));
+        deselectMeta.setLore(Arrays.asList(plugin.messages.getProperty("deselectBtnLore")));
+        deselect.setItemMeta(deselectMeta);
+
+        ItemStack[] items = {give, cancel, select, deselect, blank, blank, blank, blank, back};
         gui.setContents(items);
 
         player.openInventory(gui);
     }
     public void createRestore(Player player) {
-        Inventory gui = Bukkit.createInventory(player, 9, ChatColor.DARK_AQUA + "TM Restore");
+        Inventory gui = Bukkit.createInventory(player, 9, plugin.messages.getProperty("restoreInv"));
 
         ItemStack server = new ItemStack(Material.LAVA_BUCKET);
         ItemStack world = new ItemStack(Material.FIREWORK_STAR);
@@ -105,20 +136,20 @@ public class GUI {
         ItemStack chunk = new ItemStack(Material.GRASS_BLOCK);
 
         ItemMeta serverMeta = server.getItemMeta();
-        serverMeta.setDisplayName(ChatColor.WHITE + "Server");
+        serverMeta.setDisplayName(plugin.messages.getProperty("serverBtnName"));
         server.setItemMeta(serverMeta);
 
         ItemMeta worldMeta = world.getItemMeta();
-        worldMeta.setDisplayName(ChatColor.WHITE + "World");
+        worldMeta.setDisplayName(plugin.messages.getProperty("worldBtnName"));
         world.setItemMeta(worldMeta);
 
         SkullMeta playerFileMeta = (SkullMeta)playerFile.getItemMeta();
-        playerFileMeta.setDisplayName(ChatColor.WHITE + "Player");
+        playerFileMeta.setDisplayName(plugin.messages.getProperty("playerBtnName"));
         playerFileMeta.setOwningPlayer(player);
         playerFile.setItemMeta(playerFileMeta);
 
         ItemMeta chunkMeta = chunk.getItemMeta();
-        chunkMeta.setDisplayName(ChatColor.WHITE + "Selected Chunks");
+        chunkMeta.setDisplayName(plugin.messages.getProperty("chunksBtnName"));
         chunk.setItemMeta(chunkMeta);
 
         ItemStack[] items = {server, world, playerFile, chunk, blank, blank, blank, blank, back};
@@ -129,12 +160,12 @@ public class GUI {
     public void createSelectPlayer(Player player, int page){
         plugin.fillOfflinePlayers();
         int size = 54;
-        Inventory gui = Bukkit.createInventory(player, size, ChatColor.DARK_AQUA + "Restore Player - page " + page);
+        Inventory gui = Bukkit.createInventory(player, size, plugin.messages.getProperty("selectPlayerInv").replaceAll("%PAGE%", page + ""));
         int playersPerPage = size - 9;
         ArrayList<ItemStack> items = new ArrayList<>();
         ItemStack all = new ItemStack(Material.EMERALD);
         ItemMeta allMeta = all.getItemMeta();
-        allMeta.setDisplayName(ChatColor.WHITE + "All");
+        allMeta.setDisplayName(plugin.messages.getProperty("allBtnName"));
         all.setItemMeta(allMeta);
         items.add(all);
         List<OfflinePlayer> players = objectsOnPage(page, Arrays.asList(plugin.offlinePlayers), playersPerPage);
@@ -162,22 +193,22 @@ public class GUI {
         player.openInventory(gui);
     }
     public void createRestorePlayer(Player player) {
-        Inventory gui = Bukkit.createInventory(player, 9, ChatColor.DARK_AQUA + "Restore Player");
+        Inventory gui = Bukkit.createInventory(player, 9, plugin.messages.getProperty("restorePlayerInv"));
 
         ItemStack all = new ItemStack(Material.EMERALD);
         ItemStack inventory = new ItemStack(Material.CHEST);
         ItemStack enderChest = new ItemStack(Material.ENDER_CHEST);
 
         ItemMeta allMeta = all.getItemMeta();
-        allMeta.setDisplayName(ChatColor.WHITE + "All");
+        allMeta.setDisplayName(plugin.messages.getProperty("allBtnName"));
         all.setItemMeta(allMeta);
 
         ItemMeta inventoryMeta = inventory.getItemMeta();
-        inventoryMeta.setDisplayName(ChatColor.WHITE + "Inventory");
+        inventoryMeta.setDisplayName(plugin.messages.getProperty("inventoryBtnName"));
         inventory.setItemMeta(inventoryMeta);
 
         ItemMeta enderChestMeta = enderChest.getItemMeta();
-        enderChestMeta.setDisplayName(ChatColor.WHITE + "Ender Chest");
+        enderChestMeta.setDisplayName(plugin.messages.getProperty("enderChestBtnName"));
         enderChest.setItemMeta(enderChestMeta);
 
 
@@ -188,7 +219,7 @@ public class GUI {
     }
     public void createSelectBackup(Player player, int page){
         plugin.getBackupFiles();
-        Inventory gui = Bukkit.createInventory(player, 54, ChatColor.DARK_AQUA + "Select Backup - page " + page);
+        Inventory gui = Bukkit.createInventory(player, 54, plugin.messages.getProperty("selectBackupInv").replaceAll("%PAGE%", page + ""));
         int filesPerPage = 54 - 9;
         ArrayList<ItemStack> items = new ArrayList<>();
         List<File> files = objectsOnPage(page, plugin.backupList, filesPerPage);
@@ -216,13 +247,13 @@ public class GUI {
         player.openInventory(gui);
     }
     public void createSelectWorld(Player player, int page){
-        Inventory gui = Bukkit.createInventory(player, 54, ChatColor.DARK_AQUA + "Select World - page " + page);
+        Inventory gui = Bukkit.createInventory(player, 54, plugin.messages.getProperty("selectWorldInv").replaceAll("%PAGE%", page + ""));
         int filesPerPage = 54 - 9;
         ArrayList<ItemStack> items = new ArrayList<>();
 
         ItemStack all = new ItemStack(Material.EMERALD);
         ItemMeta allMeta = all.getItemMeta();
-        allMeta.setDisplayName(ChatColor.WHITE + "All");
+        allMeta.setDisplayName(plugin.messages.getProperty("allBtnName"));
         all.setItemMeta(allMeta);
         if(!args.contains("chunk"))
             items.add(all);

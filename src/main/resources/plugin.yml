@@ -7,7 +7,7 @@ load: STARTUP
 description: An easy and simple server backup solution
 commands:
   timemachine:
-    aliases: [tm]
+    aliases: [tm, tmb]
     description: command for changing settings and functionality
     usage: /<command> help
 permissions:

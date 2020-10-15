@@ -18,12 +18,14 @@ import java.util.*;
 public class TimeMachine extends JavaPlugin{
 
     public int autoBackupFrequency;
+    public int backupPrintFrequency;
     public File backups;
     public File mainDir;
     public File playerDataDir;
     public File pluginDir;
     public String backupPath;
     public String backupNameFormat;
+    public String language;
     public SimpleDateFormat dateFormat;
     public boolean isBackingUp = false;
     public boolean restorePlayerWithWorld;
@@ -37,14 +39,18 @@ public class TimeMachine extends JavaPlugin{
     public OfflinePlayer[] offlinePlayers;
     public List<File> backupList;
     public GUI gui;
-    public static final String NAME = ChatColor.AQUA + "[Time Machine] " + ChatColor.DARK_AQUA;
-    public static String mcVersion;
+    public Properties messages;
 
 
     @Override
     public void onEnable() {
-        String tempVersion = Bukkit.getServer().getClass().getPackage().toString();
-        mcVersion = tempVersion.substring(tempVersion.lastIndexOf('.') + 1, tempVersion.indexOf(','));
+        language = getConfig().getString("language", "en_us");
+        messages = new Properties();
+        try {
+            messages.load((getClass().getClassLoader().getResourceAsStream("languages/" + language + ".properties")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         displayBanner();
         new UpdateChecker(this).checkForUpdate();
         getConfig().options().copyDefaults(true);
@@ -57,6 +63,7 @@ public class TimeMachine extends JavaPlugin{
             this.getServer().getConsoleSender().sendMessage(e.getMessage());
         }
         this.reloadConfig();
+        backupPrintFrequency = getConfig().getInt("backupPrintFrequency", 5);
         mainDir = getDataFolder().getAbsoluteFile().getParentFile().getParentFile();
         playerDataDir = new File(mainDir.getAbsolutePath() + File.separator + "world" + File.separator + "playerdata");
         pluginDir = new File(mainDir.getAbsolutePath() + File.separator + "plugins");
@@ -69,7 +76,6 @@ public class TimeMachine extends JavaPlugin{
         restorePlayerWithWorld = getConfig().getBoolean("restorePlayerWithWorld");
         backupExtensionExceptions = (List<String>)getConfig().getList("backupExtensionExceptions");
         backupFolderExceptions = (List<String>)getConfig().getList("backupFolderExceptions");
-
         gui = new GUI(this);
         getBackupFiles();
         fillOfflinePlayers();
@@ -112,9 +118,8 @@ public class TimeMachine extends JavaPlugin{
         Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_AQUA + "/_  __(_)_ _  ___   /  |/  /__ _____/ /  (_)__  ___ ");
         Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_AQUA + " / / / /  ' \\/ -_) / /|_/ / _ `/ __/ _ \\/ / _ \\/ -_)");
         Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_AQUA + "/_/ /_/_/_/_/\\__/ /_/  /_/\\_,_/\\__/_//_/_/_//_/\\__/ ");
-        Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_GRAY +      "        Version " + ChatColor.GOLD + version);
-        Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_GRAY +      "        Author  " + ChatColor.WHITE + author.get(0));
-        Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_GRAY +      "        MC Version " + ChatColor.GOLD + mcVersion);
+        Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_GRAY +      "        Version  " + ChatColor.GOLD + version);
+        Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.DARK_GRAY +      "        Author   " + ChatColor.WHITE + author.get(0));
 
     }
     public void fillOfflinePlayers() {

@@ -33,7 +33,7 @@ public class TimeMachineTabCompleter implements TabCompleter {
 
         switch (args.length) {
             case 1:
-                commands = Arrays.asList("backup", "restore", "deletebackup", "wand", "saveselectedchunks", "discardsavedchunks", "gui");
+                commands = Arrays.asList("backup", "restore", "deletebackup", "wand", "gui");
                 for (String f : commands)
                     if (f.toLowerCase().startsWith(args[0].toLowerCase()))
                         list.add(f);
@@ -48,6 +48,12 @@ public class TimeMachineTabCompleter implements TabCompleter {
                 } else if (args[0].equalsIgnoreCase("deletebackup")
                         && plugin.backups.listFiles() != null) {
                     return getBackupFiles(list, args[1]);
+                } else if (args[0].equalsIgnoreCase("wand")) {
+                    commands = Arrays.asList("give", "cancel", "selectchunks", "deselectchunks");
+                    for (String f : commands)
+                        if (f.toLowerCase().startsWith(args[1].toLowerCase()))
+                            list.add(f);
+                    return list;
                 }
                 break;
             case 3:
@@ -68,8 +74,8 @@ public class TimeMachineTabCompleter implements TabCompleter {
                             }
                             break;
                         case "player":
-                            if ("all_players".startsWith(args[2].toLowerCase()))
-                                list.add("all_players");
+                            if ("all".startsWith(args[2].toLowerCase()))
+                                list.add("all");
 
                             for (OfflinePlayer player : plugin.offlinePlayers)
                                 if (player.getName() != null &&

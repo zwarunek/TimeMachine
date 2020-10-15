@@ -36,7 +36,7 @@ public class Restore {
         }
         if(player.equalsIgnoreCase("all")){
             for (Player onlinePlayer : Bukkit.getOnlinePlayers())
-                onlinePlayer.kickPlayer(ChatColor.GREEN + "Restoring your playersave to a previous backup");
+                onlinePlayer.kickPlayer(plugin.messages.getProperty("playerRestoreKick"));
             if(part.equalsIgnoreCase("all")) {
                 String dest = plugin.mainDir.getParent();
                 String folder = (plugin.mainDir.getName() + "/world/playerdata/");
@@ -81,7 +81,7 @@ public class Restore {
         else{
             Player playerObject = Bukkit.getPlayer(UUID.fromString(player));
             assert playerObject != null;
-            playerObject.kickPlayer("Restoring your playersave to a previous backup");
+            playerObject.kickPlayer(plugin.messages.getProperty("playerRestoreKick"));
             if(part.equalsIgnoreCase("all")) {
                 String dest = plugin.mainDir.getParent();
                 String folder = (plugin.mainDir.getName() + "/world/playerdata/" + player + ".dat");
@@ -143,7 +143,7 @@ public class Restore {
 
             currentFile = new File(plugin.mainDir.getAbsolutePath() + File.separator + world + File.separator + "region" + File.separator + regionFileName);
             if(!currentFile.exists()){
-                System.out.println("Handle this exception");
+                Bukkit.getConsoleSender().sendMessage(plugin.messages.getProperty("failedPrefix") + plugin.messages.getProperty("regionFileNotFound"));
                 return;
             }
 
@@ -152,8 +152,7 @@ public class Restore {
             try {
                 zip.extractFile(plugin.mainDir.getName() + "/"+world+"/region/" + regionFileName, backupDir, regionFileName);
             }catch (ZipException e){
-//                HANDLE ERROR: Chunk File not backed up
-                System.out.println("HANDLE ERROR: Chunk File not backed up");
+                Bukkit.getConsoleSender().sendMessage(plugin.messages.getProperty("warningPrefix") + plugin.messages.getProperty("chunkNotInBackup"));
                 return;
             }
             File backedFile = new File(backupDir + File.separator + regionFileName);
@@ -213,7 +212,7 @@ public class Restore {
     }
     private static void prepareServer(TimeMachine plugin){
         for (Player player : Bukkit.getOnlinePlayers())
-            player.kickPlayer(ChatColor.GREEN + "The server is restoring to a previous backup");
+            player.kickPlayer(plugin.messages.getProperty("serverRestoreKick"));
 
         for (Plugin p : Bukkit.getPluginManager().getPlugins())
             if (p != plugin)

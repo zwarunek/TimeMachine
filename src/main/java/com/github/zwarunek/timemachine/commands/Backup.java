@@ -38,7 +38,7 @@ public class Backup {
             } catch (Exception ignored) {}
         }
         Player player = null;
-        BossBar bar = Bukkit.createBossBar(ChatColor.DARK_AQUA + "Backing Up Server", BarColor.GREEN, BarStyle.SOLID);
+        BossBar bar = Bukkit.createBossBar(plugin.messages.getProperty("backupBar"), BarColor.GREEN, BarStyle.SOLID);
         if(sender instanceof Player) {
             player = (Player) sender;
             bar.addPlayer(player);
@@ -64,18 +64,20 @@ public class Backup {
             @Override
             public void run() {
                 if (!progressMonitor.getState().equals(ProgressMonitor.State.READY)) {
+                    String progress = plugin.messages.getProperty("backupBarProgress").replaceAll("%PROGRESS%", progressMonitor.getPercentDone() + "");
                     if(sender instanceof  Player) {
                         bar.setProgress(Math.min(((double) progressMonitor.getPercentDone()) / 100, 1.0));
-                        bar.setTitle(ChatColor.DARK_AQUA + "Backing Up Server: " + ChatColor.GOLD + progressMonitor.getPercentDone() + "%");
+                        bar.setTitle(progress);
                     }
-                    if(print && progressMonitor.getPercentDone()%5==0) {
-                        plugin.getServer().getConsoleSender().sendMessage(TimeMachine.NAME + "Backup: " + progressMonitor.getPercentDone() + "%");
+                    if(print && progressMonitor.getPercentDone()% plugin.backupPrintFrequency==0) {
+                        plugin.getServer().getConsoleSender().sendMessage(progress);
                         print = false;
                     }
                     else if (!print && progressMonitor.getPercentDone()%5!=0){
                         print = true;
                     }
                 }
+
                 else{
                     plugin.isBackingUp = false;
                     bar.removeAll();
@@ -96,7 +98,7 @@ public class Backup {
                             @Override
                             public void run() {
                                 if (!plugin.isBackingUp) {
-                                    plugin.getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "[SUCCESS]" + ChatColor.DARK_AQUA + " Server was backed up!");
+                                    plugin.getServer().getConsoleSender().sendMessage(plugin.messages.getProperty("successPrefix") + plugin.messages.getProperty("backupSuccess"));
                                     Bukkit.getScheduler().cancelTask(Backup.taskIndex);
                                     this.cancel();
                                 }

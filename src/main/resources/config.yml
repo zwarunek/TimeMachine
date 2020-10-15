@@ -1,9 +1,22 @@
+# Change your language. Supported languages
+# en_us - English
+# ro_ro - Romanian
+# fr_fr - French
+# de_de - German
+# es_es - Spanish
+# More to come...
+language: en_us
+
 # Will there be automatic backups
 autoBackups: true
 
 # How often the server will automatically backup in seconds; default is every 12 hours
 autoBackupFrequency: 43200
 
+# Console backup print frequency by percent. ex: 5 would print every 5%
+backupPrintFrequency: 5
+
+# Path to backup folder. '' by default
 backupFolderDirectory: ''
 
 # To include the plugins' jar files

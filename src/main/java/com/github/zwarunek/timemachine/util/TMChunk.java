@@ -67,19 +67,15 @@ public class TMChunk {
     public Chunk getChunk() {
         return chunk;
     }
-
     public TMChunk getEast() {
         return east;
     }
-
     public TMChunk getNorth() {
         return north;
     }
-
     public TMChunk getSouth() {
         return south;
     }
-
     public TMChunk getWest() {
         return west;
     }
@@ -89,25 +85,21 @@ public class TMChunk {
     public Hashtable<String, List<Block>> getChangedBlocks() {
         return changedBlocks;
     }
-
     public void setEast(TMChunk east) {
         this.east = east;
         if(east != null)
             this.east.west = this;
     }
-
     public void setNorth(TMChunk north) {
         this.north = north;
         if(north != null)
             this.north.south = this;
     }
-
     public void setSouth(TMChunk south) {
         this.south = south;
         if(south != null)
             this.south.north = this;
     }
-
     public void setWest(TMChunk west) {
         this.west = west;
         if(west != null)
@@ -116,7 +108,6 @@ public class TMChunk {
     public void setChangedBlocks(Hashtable<String, List<Block>> changedBlocks) {
         this.changedBlocks = changedBlocks;
     }
-
     public void showBorder(Player player) {
         showSide(player, "corners");
         if(north == null){

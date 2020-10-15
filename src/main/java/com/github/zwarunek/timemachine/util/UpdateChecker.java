@@ -24,7 +24,7 @@ import java.net.URL;
 
 public class UpdateChecker {
 
-    private final JavaPlugin javaPlugin;
+    private final TimeMachine plugin;
     private final String localPluginVersion;
     private String githubPluginVersion;
 
@@ -35,10 +35,10 @@ public class UpdateChecker {
     //PermissionDefault.TRUE == all OPs are notified regardless of having the permission.
     private static final Permission UPDATE_PERM = new Permission("timemachine.update", PermissionDefault.FALSE);
 
-    public UpdateChecker(final JavaPlugin javaPlugin) {
-        this.javaPlugin = javaPlugin;
-        this.localPluginVersion = javaPlugin.getDescription().getVersion();
-        this.checkInterval = javaPlugin.getConfig().getInt("updateCheckInterval", 72000);
+    public UpdateChecker(final TimeMachine plugin) {
+        this.plugin = plugin;
+        this.localPluginVersion = plugin.getDescription().getVersion();
+        this.checkInterval = plugin.getConfig().getInt("updateCheckInterval", 72000);
     }
 
     public void checkForUpdate() {
@@ -46,14 +46,14 @@ public class UpdateChecker {
             @Override
             public void run() {
                 //The request is executed asynchronously as to not block the main thread.
-                Bukkit.getScheduler().runTaskAsynchronously(javaPlugin, () -> {
+                Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                     //Request the current version of your plugin on SpigotMC.
                     check(this);
                 });
             }
-        }.runTaskTimer(javaPlugin, 0, checkInterval * 20);
+        }.runTaskTimer(plugin, 0, checkInterval * 20);
     }
-    public void check(BukkitRunnable runable) {
+    public void check(BukkitRunnable runnable) {
         try {
             final HttpsURLConnection connection = (HttpsURLConnection) new URL("https://api.github.com/repos/zwarunek/timemachine/releases/latest").openConnection();
             connection.setRequestMethod("GET");
@@ -74,26 +74,26 @@ public class UpdateChecker {
             githubPluginVersion = response.get("tag_name").toString().substring(1);
             System.out.println();
         } catch (final IOException | ParseException e) {
-            Bukkit.getServer().getConsoleSender().sendMessage(TimeMachine.NAME + "Error checking for new version");
+            Bukkit.getServer().getConsoleSender().sendMessage(plugin.messages.getProperty("tmPrefix") + plugin.messages.getProperty("updateCheckError"));
             e.printStackTrace();
-            runable.cancel();
+            runnable.cancel();
             return;
         }
 
         //Check if the requested version is the same as the one in your plugin.yml.
         if (localPluginVersion.equals(githubPluginVersion)) return;
 
-        Bukkit.getServer().getConsoleSender().sendMessage(TimeMachine.NAME + "This is an outdated version. Version " + githubPluginVersion + " is out at: " + ChatColor.RESET + "https://www.spigotmc.org/resources/" + ID + "/history");
+        Bukkit.getServer().getConsoleSender().sendMessage(plugin.messages.getProperty("tmPrefix") + plugin.messages.getProperty("outdatedVersion").replaceAll("%VERSION%", githubPluginVersion).replaceAll("%ID%", ID + ""));
 
         //Register the PlayerJoinEvent
-        Bukkit.getScheduler().runTask(javaPlugin, () -> Bukkit.getPluginManager().registerEvents(new Listener() {
+        Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getPluginManager().registerEvents(new Listener() {
             @EventHandler(priority = EventPriority.MONITOR)
             public void onPlayerJoin(final PlayerJoinEvent event) {
                 final Player player = event.getPlayer();
                 if (!player.hasPermission(UPDATE_PERM)) return;
-                player.sendMessage(TimeMachine.NAME + "This is an outdated version. Version " + githubPluginVersion + " is out at: " + ChatColor.RESET + "https://www.spigotmc.org/resources/" + ID + "/history");
+                player.sendMessage(plugin.messages.getProperty("tmPrefix") + plugin.messages.getProperty("outdatedVersion").replaceAll("%VERSION%", githubPluginVersion).replaceAll("%ID%", ID + ""));
             }
-        }, javaPlugin));
-        runable.cancel(); //Cancel the runnable as an update has been found.
+        }, plugin));
+        runnable.cancel(); //Cancel the runnable as an update has been found.
     }
 }
