@@ -13,36 +13,32 @@ autoBackups: true
 # How often the server will automatically backup in seconds; default is every 12 hours
 autoBackupFrequency: 43200
 
-# Console backup print frequency by percent. ex: 5 would print every 5%
-backupPrintFrequency: 5
+# Console backup print frequency by percent. ex: 10 would print every 10%
+backupPrintFrequency: 10
 
-# Path to backup folder. '' by default
+# Path to backup folder. '' by default. Be sure to include '/' before if you are changing it
 backupFolderDirectory: ''
-
-# To include the plugins' jar files
-includePluginJars: false
-
-# To include the plugins' jar files
-includeServerJar: false
 
 # What folders you dont want backed up
 backupFolderExceptions:
   - 'backups'
   - 'cache'
+  - 'crash-reports'
   - 'logs'
 
 # Which file extensions you dont want backed up
 backupExtensionExceptions:
-  - 'jar'
-  - 'bat'
+  - '.jar'
+  - '.bat'
+  - '.lock'
 
-# format that backups will be named. &%date%& will be replaced with the date
+# format that backups will be named. %date% will be replaced with the date
 backupNameFormat: 'Server-Backup-%date%'
 
 # Format that the date will be presented. For syntax, consult https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html
 dateFormat: 'yyyy-MM-dd_HH-mm-ss'
 
-# IF you want full player saves that are in that world to be rolled back or not(Location will always be rolled back)
+# If you want full player saves that are in that world to be rolled back or not(Location will always be rolled back)
 restorePlayerWithWorld: true
 
 # Amount of seconds between update checks

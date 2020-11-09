@@ -7,7 +7,6 @@ import net.lingala.zip4j.model.ExcludeFileFilter;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.progress.ProgressMonitor;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
@@ -37,7 +36,7 @@ public class Backup {
 
             } catch (Exception ignored) {}
         }
-        Player player = null;
+        Player player;
         BossBar bar = Bukkit.createBossBar(plugin.messages.getProperty("backupBar"), BarColor.GREEN, BarStyle.SOLID);
         if(sender instanceof Player) {
             player = (Player) sender;
@@ -49,7 +48,15 @@ public class Backup {
         ZipFile zipFile = new ZipFile(plugin.backups.getAbsolutePath() + File.separator + plugin.backupNameFormat.replaceAll("%date%", plugin.dateFormat.format(d)) + ".zip");
         ProgressMonitor progressMonitor = zipFile.getProgressMonitor();
 
-        ExcludeFileFilter exclude = file -> file.getName().equalsIgnoreCase("backups");
+        ExcludeFileFilter exclude = file -> {
+            for(String folder : plugin.backupFolderExceptions){
+                if (file.getName().equalsIgnoreCase(folder)) return true;
+            }
+            for(String extension : plugin.backupExtensionExceptions){
+                if (file.getName().endsWith(extension)) return true;
+            }
+            return false;
+        };
         ZipParameters zipParam = new ZipParameters();
         zipParam.setExcludeFileFilter(exclude);
         zipFile.setRunInThread(true);
@@ -69,12 +76,13 @@ public class Backup {
                         bar.setProgress(Math.min(((double) progressMonitor.getPercentDone()) / 100, 1.0));
                         bar.setTitle(progress);
                     }
-                    if(print && progressMonitor.getPercentDone()% plugin.backupPrintFrequency==0) {
-                        plugin.getServer().getConsoleSender().sendMessage(progress);
-                        print = false;
-                    }
-                    else if (!print && progressMonitor.getPercentDone()%5!=0){
-                        print = true;
+                    if(plugin.backupPrintFrequency > 0 && plugin.backupPrintFrequency < 100) {
+                        if (print && progressMonitor.getPercentDone() != 0 && progressMonitor.getPercentDone() % plugin.backupPrintFrequency == 0) {
+                            plugin.getServer().getConsoleSender().sendMessage(progress);
+                            print = false;
+                        } else if (!print && progressMonitor.getPercentDone() % plugin.backupPrintFrequency != 0) {
+                            print = true;
+                        }
                     }
                 }
 

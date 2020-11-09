@@ -12,6 +12,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -82,15 +84,19 @@ public class TimeMachine extends JavaPlugin{
         chunkWand = new ChunkWand(this);
         command = new TimeMachineCommand(this);
         MetricsLite metrics = new MetricsLite(this, 8860);
-//        chunkWand = new ChunkWand();
         final TimeMachineCommand command = new TimeMachineCommand(this);
         final TimeMachineTabCompleter tabCompleter = new TimeMachineTabCompleter(this);
         ItemListener itemListener = new ItemListener(this, gui);
         getServer().getPluginManager().registerEvents(itemListener, this);
         getCommand("timemachine").setExecutor(command);
         getCommand("timemachine").setTabCompleter(tabCompleter);
-        if(!backups.exists())
-            backups.mkdir();
+        if(!backups.exists()) {
+            try {
+                Files.createDirectories(Paths.get(backups.toURI()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         new Backup().autosave(this);
     }
 

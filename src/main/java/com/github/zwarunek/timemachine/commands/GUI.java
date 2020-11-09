@@ -4,11 +4,6 @@ import com.github.zwarunek.timemachine.TimeMachine;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerUnleashEntityEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -16,7 +11,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import java.io.File;
-import java.sql.Time;
 import java.util.*;
 
 public class GUI {
@@ -39,23 +33,26 @@ public class GUI {
         this.back = new ItemStack(Material.BARRIER);
 
         ItemMeta refreshMeta = refresh.getItemMeta();
+        ItemMeta pageRightMeta = pageRight.getItemMeta();
+        ItemMeta pageLeftMeta = pageLeft.getItemMeta();
+        ItemMeta backMeta = back.getItemMeta();
+        if(refreshMeta == null || pageRightMeta == null || pageLeftMeta == null || backMeta == null)
+            return;
+
         refreshMeta.setDisplayName(plugin.messages.getProperty("refreshBtnName"));
-        refreshMeta.setLore(Arrays.asList(plugin.messages.getProperty("refreshBtnLore")));
+        refreshMeta.setLore(Collections.singletonList(plugin.messages.getProperty("refreshBtnLore")));
         refresh.setItemMeta(refreshMeta);
 
-        ItemMeta pageRightMeta = pageRight.getItemMeta();
         pageRightMeta.setDisplayName(plugin.messages.getProperty("pageRightBtnName"));
-        pageRightMeta.setLore(Arrays.asList(plugin.messages.getProperty("pageRightBtnLore")));
+        pageRightMeta.setLore(Collections.singletonList(plugin.messages.getProperty("pageRightBtnLore")));
         pageRight.setItemMeta(pageRightMeta);
 
-        ItemMeta pageLeftMeta = pageLeft.getItemMeta();
         pageLeftMeta.setDisplayName(plugin.messages.getProperty("pageLeftBtnName"));
-        pageLeftMeta.setLore(Arrays.asList(plugin.messages.getProperty("pageRightBtnLore")));
+        pageLeftMeta.setLore(Collections.singletonList(plugin.messages.getProperty("pageRightBtnLore")));
         pageLeft.setItemMeta(pageLeftMeta);
 
-        ItemMeta backMeta = back.getItemMeta();
         backMeta.setDisplayName(plugin.messages.getProperty("backBtnName"));
-        backMeta.setLore(Arrays.asList(plugin.messages.getProperty("backBtnLore")));
+        backMeta.setLore(Collections.singletonList(plugin.messages.getProperty("backBtnLore")));
         back.setItemMeta(backMeta);
     }
 
@@ -68,23 +65,25 @@ public class GUI {
         ItemStack deleteBackups = new ItemStack(Material.MUSIC_DISC_11);
 
         ItemMeta backupMeta = backup.getItemMeta();
+        ItemMeta restoreMeta = restore.getItemMeta();
+        ItemMeta wandMeta = wand.getItemMeta();
+        ItemMeta deleteBackupsMeta = deleteBackups.getItemMeta();
+        if(backupMeta == null || restoreMeta == null || wandMeta == null || deleteBackupsMeta == null)
+            return;
         backupMeta.setDisplayName(plugin.messages.getProperty("backupBtnName"));
-        backupMeta.setLore(Arrays.asList(plugin.messages.getProperty("backupBtnlore")));
+        backupMeta.setLore(Collections.singletonList(plugin.messages.getProperty("backupBtnlore")));
         backup.setItemMeta(backupMeta);
 
-        ItemMeta restoreMeta = restore.getItemMeta();
         restoreMeta.setDisplayName(plugin.messages.getProperty("restoreBtnName"));
         restore.setItemMeta(restoreMeta);
 
-        ItemMeta wandMeta = wand.getItemMeta();
         wandMeta.setDisplayName(plugin.messages.getProperty("wandBtnName"));
         wandMeta.addEnchant(Enchantment.LUCK, 1, false);
         wandMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         wand.setItemMeta(wandMeta);
 
-        ItemMeta deleteBackupsMeta = deleteBackups.getItemMeta();
         deleteBackupsMeta.setDisplayName(plugin.messages.getProperty("deleteBtnName"));
-        deleteBackupsMeta.setLore(Arrays.asList(plugin.messages.getProperty("deleteBtnlore")));
+        deleteBackupsMeta.setLore(Collections.singletonList(plugin.messages.getProperty("deleteBtnlore")));
         deleteBackups.setItemMeta(deleteBackupsMeta);
 
         ItemStack[] items = {backup, restore, wand, deleteBackups};
@@ -101,25 +100,27 @@ public class GUI {
         ItemStack deselect = new ItemStack(Material.MAGENTA_DYE);
 
         ItemMeta giveMeta = give.getItemMeta();
+        ItemMeta cancelMeta = cancel.getItemMeta();
+        ItemMeta selectMeta = select.getItemMeta();
+        ItemMeta deselectMeta = deselect.getItemMeta();
+        if(giveMeta == null || cancelMeta == null || selectMeta == null || deselectMeta == null)
+            return;
         giveMeta.setDisplayName(plugin.messages.getProperty("giveBtnName"));
         giveMeta.addEnchant(Enchantment.LUCK, 1, false);
         giveMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         giveMeta.setLore(Arrays.asList(plugin.messages.getProperty("giveBtnLore1"), plugin.messages.getProperty("giveBtnLore2"),plugin.messages.getProperty("giveBtnLore3"), plugin.messages.getProperty("giveBtnLore4")));
         give.setItemMeta(giveMeta);
 
-        ItemMeta cancelMeta = cancel.getItemMeta();
         cancelMeta.setDisplayName(plugin.messages.getProperty("cancelBtnName"));
         cancelMeta.setLore(Arrays.asList(plugin.messages.getProperty("cancelBtnLore1"), plugin.messages.getProperty("cancelBtnLore2")));
         cancel.setItemMeta(cancelMeta);
 
-        ItemMeta selectMeta = select.getItemMeta();
         selectMeta.setDisplayName(plugin.messages.getProperty("selectBtnName"));
-        selectMeta.setLore(Arrays.asList(plugin.messages.getProperty("selectBtnLore")));
+        selectMeta.setLore(Collections.singletonList(plugin.messages.getProperty("selectBtnLore")));
         select.setItemMeta(selectMeta);
 
-        ItemMeta deselectMeta = deselect.getItemMeta();
         deselectMeta.setDisplayName(plugin.messages.getProperty("deselectBtnName"));
-        deselectMeta.setLore(Arrays.asList(plugin.messages.getProperty("deselectBtnLore")));
+        deselectMeta.setLore(Collections.singletonList(plugin.messages.getProperty("deselectBtnLore")));
         deselect.setItemMeta(deselectMeta);
 
         ItemStack[] items = {give, cancel, select, deselect, blank, blank, blank, blank, back};
@@ -136,19 +137,21 @@ public class GUI {
         ItemStack chunk = new ItemStack(Material.GRASS_BLOCK);
 
         ItemMeta serverMeta = server.getItemMeta();
+        ItemMeta worldMeta = world.getItemMeta();
+        SkullMeta playerFileMeta = (SkullMeta)playerFile.getItemMeta();
+        ItemMeta chunkMeta = chunk.getItemMeta();
+        if(serverMeta == null || worldMeta == null || playerFileMeta == null || chunkMeta == null)
+            return;
         serverMeta.setDisplayName(plugin.messages.getProperty("serverBtnName"));
         server.setItemMeta(serverMeta);
 
-        ItemMeta worldMeta = world.getItemMeta();
         worldMeta.setDisplayName(plugin.messages.getProperty("worldBtnName"));
         world.setItemMeta(worldMeta);
 
-        SkullMeta playerFileMeta = (SkullMeta)playerFile.getItemMeta();
         playerFileMeta.setDisplayName(plugin.messages.getProperty("playerBtnName"));
         playerFileMeta.setOwningPlayer(player);
         playerFile.setItemMeta(playerFileMeta);
 
-        ItemMeta chunkMeta = chunk.getItemMeta();
         chunkMeta.setDisplayName(plugin.messages.getProperty("chunksBtnName"));
         chunk.setItemMeta(chunkMeta);
 
@@ -165,6 +168,7 @@ public class GUI {
         ArrayList<ItemStack> items = new ArrayList<>();
         ItemStack all = new ItemStack(Material.EMERALD);
         ItemMeta allMeta = all.getItemMeta();
+        if(allMeta == null) return;
         allMeta.setDisplayName(plugin.messages.getProperty("allBtnName"));
         all.setItemMeta(allMeta);
         items.add(all);
@@ -177,6 +181,7 @@ public class GUI {
                 ItemStack playerStack = new ItemStack(Material.PLAYER_HEAD);
 
                 SkullMeta playerFileMeta = (SkullMeta) playerStack.getItemMeta();
+                assert playerFileMeta != null;
                 playerFileMeta.setOwningPlayer(player1);
                 playerStack.setItemMeta(playerFileMeta);
 
@@ -200,14 +205,17 @@ public class GUI {
         ItemStack enderChest = new ItemStack(Material.ENDER_CHEST);
 
         ItemMeta allMeta = all.getItemMeta();
+        assert allMeta != null;
         allMeta.setDisplayName(plugin.messages.getProperty("allBtnName"));
         all.setItemMeta(allMeta);
 
         ItemMeta inventoryMeta = inventory.getItemMeta();
+        assert inventoryMeta != null;
         inventoryMeta.setDisplayName(plugin.messages.getProperty("inventoryBtnName"));
         inventory.setItemMeta(inventoryMeta);
 
         ItemMeta enderChestMeta = enderChest.getItemMeta();
+        assert enderChestMeta != null;
         enderChestMeta.setDisplayName(plugin.messages.getProperty("enderChestBtnName"));
         enderChest.setItemMeta(enderChestMeta);
 
@@ -232,6 +240,7 @@ public class GUI {
                 ItemStack fileStack = new ItemStack(Material.MUSIC_DISC_13);
 
                 ItemMeta fileMeta = fileStack.getItemMeta();
+                assert fileMeta != null;
                 fileMeta.setDisplayName(file.getName());
                 fileStack.setItemMeta(fileMeta);
                 items.add(fileStack);
@@ -253,6 +262,7 @@ public class GUI {
 
         ItemStack all = new ItemStack(Material.EMERALD);
         ItemMeta allMeta = all.getItemMeta();
+        assert allMeta != null;
         allMeta.setDisplayName(plugin.messages.getProperty("allBtnName"));
         all.setItemMeta(allMeta);
         if(!args.contains("chunk"))
@@ -266,6 +276,7 @@ public class GUI {
                 ItemStack worldStack = new ItemStack(Material.FIREWORK_STAR);
 
                 ItemMeta fileMeta = worldStack.getItemMeta();
+                assert fileMeta != null;
                 fileMeta.setDisplayName(world.getName());
                 worldStack.setItemMeta(fileMeta);
                 items.add(worldStack);

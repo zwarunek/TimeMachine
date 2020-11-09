@@ -88,7 +88,7 @@ public class ItemListener implements Listener {
             }
         }
         ItemStack clickedItem = event.getCurrentItem();
-        if(clickedItem == null){
+        if(clickedItem == null || clickedItem.getItemMeta() == null || !clickedItem.getItemMeta().hasDisplayName()){
             event.setCancelled(true);
             return;
         }
@@ -199,6 +199,7 @@ public class ItemListener implements Listener {
             }
             else if(clickedItem.getType().equals(Material.PLAYER_HEAD)){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
+                if(((SkullMeta)clickedItem.getItemMeta()).hasOwner())
                 gui.args.add(((SkullMeta)clickedItem.getItemMeta()).getOwningPlayer().getName());
                 gui.createRestorePlayer((Player) event.getWhoClicked());
             }
