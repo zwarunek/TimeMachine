@@ -89,13 +89,12 @@ public class ItemListener implements Listener {
         }
         ItemStack clickedItem = event.getCurrentItem();
         if(clickedItem == null || clickedItem.getItemMeta() == null || !clickedItem.getItemMeta().hasDisplayName()){
-            event.setCancelled(true);
             return;
         }
         String inventory = event.getView().getTitle();
         String button = clickedItem.getItemMeta().getDisplayName();
         if(inventory.equalsIgnoreCase(plugin.messages.getProperty("timeMachineInv"))){
-            
+
             if(button.equals(plugin.messages.getProperty("backupBtnName"))){
                 player.playEffect(player.getLocation(), Effect.CLICK2, 0);
                 gui.args = Collections.singletonList("backup");
